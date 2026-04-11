@@ -4,7 +4,7 @@
 
 **Hollow** est un éditeur de texte TUI (Terminal User Interface) moderne écrit en Go. Il fusionne la simplicité d'utilisation de **Nano** avec la puissance de navigation et de gestion de fichiers distants de **mcedit** (Midnight Commander).
 
-Ce projet est conçu avec l'ia, dans un but récréatif et pédagogique.
+Ce projet est développé en collaboration avec Gemini Code Assist, dans un but récréatif et éducatif.
 
 
 ## Fonctionnalités
@@ -50,8 +50,8 @@ type VFS interface {
 | `Ctrl + K` | Copier le fichier ou dossier sélectionné |
 | `Ctrl + U` | Coller l'élément dans le dossier actuel |
 | `Ctrl + S` | Sauvegarder le fichier courant |
-| `Ctrl + K` | Couper la ligne actuelle (Éditeur) |
-| `Ctrl + U / V` | Coller le texte (Éditeur) |
+| `Ctrl + K` | Couper la ligne entière (Éditeur) |
+| `Ctrl + U / V` | Coller/Rétablir la ligne avec décalage (Éditeur) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier |
 
 ## Installation & Utilisation
