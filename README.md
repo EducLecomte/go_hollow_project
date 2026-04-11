@@ -4,7 +4,7 @@
 
 **Hollow** est un éditeur de texte TUI (Terminal User Interface) moderne écrit en Go. Il fusionne la simplicité d'utilisation de **Nano** avec la puissance de navigation et de gestion de fichiers distants de **mcedit** (Midnight Commander).
 
-## 🚀 Fonctionnalités
+## Fonctionnalités
 
 - **Explorateur de fichiers intégré** : Navigation fluide dans l'arborescence locale.
 - **Éditeur de texte complet** : Support des fonctionnalités standards d'édition.
@@ -12,7 +12,7 @@
 - **Presse-papier système** : Copier-coller intégré avec l'OS (X11/Wayland).
 - **Aide contextuelle** : Barre de raccourcis dynamique et documentation interactive via `F1`.
 
-## 🛠 Architecture Technique
+## Architecture Technique
 
 Le projet est construit de manière modulaire :
 
@@ -33,7 +33,7 @@ type VFS interface {
 }
 ```
 
-## ⌨️ Raccourcis Clavier
+## Raccourcis Clavier
 
 | Touche | Action |
 | :--- | :--- |
@@ -51,7 +51,7 @@ type VFS interface {
 | `Ctrl + U / V` | Coller le texte (Éditeur) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier |
 
-## 📦 Installation & Utilisation
+## Installation & Utilisation
 
 ### Prérequis
 
@@ -64,15 +64,15 @@ type VFS interface {
 go run .
 ```
 
-## 📈 État du Projet
+## État du Projet
 
-### ✅ Implémenté
+### Implémenté
 - Navigation locale avec gestion des métadonnées (taille).
 - Lecture et écriture réelle sur le disque.
 - Architecture factorisée pour la maintenabilité.
 - Barre de chemin dynamique et interface réactive.
 
-### ⏳ En cours / À venir
+### En cours / À venir
 - [ ] **Client FTP** : Implémentation de `FTPFS` pour l'édition distante.
 - [ ] **Explorateur d'archives** : Support des fichiers `.zip` et `.tar.gz`.
 - [ ] **Recherche avancée** : Logique de recherche textuelle avec surlignage.
