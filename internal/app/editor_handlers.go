@@ -13,8 +13,7 @@ func (e *EditorApp) setupEditorHandlers() {
 	// Réinitialise le curseur et l'affichage en haut de page lors de la prise de focus
 	// Cela couvre le passage par "Tab" et la sélection depuis l'explorateur.
 	e.Editor.SetFocusFunc(func() {
-		// SetText avec keepCursor=false force le curseur à (0,0)
-		// et assure que le haut du fichier est visible.
+		// Faute de SetCursor, SetText avec false réinitialise le curseur à 0,0
 		e.Editor.SetText(e.Editor.GetText(), false)
 	})
 
@@ -39,7 +38,6 @@ func (e *EditorApp) setupEditorHandlers() {
 
 // cutLine : Supprime la ligne et la met dans le presse-papier
 func (e *EditorApp) cutLine() {
-	// GetCursor renvoie 4 valeurs : row, col, width, height
 	row, _, _, _ := e.Editor.GetCursor()
 	lines := strings.Split(e.Editor.GetText(), "\n")
 
@@ -81,7 +79,6 @@ func (e *EditorApp) pasteText(isUncut bool) {
 	text = strings.ReplaceAll(text, "\r", "")
 
 	// Pour que la ligne actuelle "descende", on colle systématiquement au début de la ligne
-	// On s'assure d'ignorer les 4 valeurs de retour pour éviter l'erreur de compilation
 	row, _, _, _ := e.Editor.GetCursor()
 	lines := strings.Split(e.Editor.GetText(), "\n")
 
