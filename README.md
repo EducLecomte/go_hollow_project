@@ -16,12 +16,10 @@
 
 Le projet est construit de manière modulaire :
 
-- `main.go` : Point d'entrée de l'application.
-- `ui.go` : Structure de l'interface et définition du layout (via tview).
-- `fs.go` : Abstraction VFS et implémentation du système de fichiers local.
-- `actions.go` : Logique de manipulation des fichiers.
-- `handlers.go` : Gestion des entrées clavier et de l'interactivité.
-- `utils.go` : Fonctions utilitaires et constantes de texte.
+- `main.go` : Point d'entrée, initialise l'application.
+- `internal/app/` : Cœur de l'application (UI, Handlers, Actions).
+- `internal/vfs/` : Abstraction et implémentations du système de fichiers (VFS).
+- `internal/utils/` : Constantes d'aide et formatage utilitaire.
 
 ### Le coeur : L'interface VFS
 

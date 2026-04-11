@@ -1,9 +1,10 @@
-package main
+package app
 
 import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -11,8 +12,6 @@ import (
 func (e *EditorApp) setupHandlers() {
 	// 1. Raccourcis Globaux (Application)
 	e.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		// Liste blanche des touches Ctrl utilisées par Hollow
-		// On inclut Tab, Enter et Backspace car certains terminaux les envoient avec le modificateur Ctrl
 		allowedCtrlKeys := map[tcell.Key]bool{
 			tcell.KeyCtrlS: true, tcell.KeyCtrlF: true, tcell.KeyCtrlD: true,
 			tcell.KeyCtrlR: true, tcell.KeyCtrlK: true, tcell.KeyCtrlU: true,
@@ -23,8 +22,6 @@ func (e *EditorApp) setupHandlers() {
 
 		switch event.Key() {
 		case tcell.KeyF1:
-			// Si une modale est déjà ouverte, on laisse l'événement circuler
-			// sans ouvrir une nouvelle fenêtre d'aide (évite le blocage)
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
 				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") ||
 				e.Pages.HasPage("delete") {
@@ -41,38 +38,28 @@ func (e *EditorApp) setupHandlers() {
 			e.showQuitConfirmation()
 			return nil
 		case tcell.KeyCtrlC:
-			// Bloque le signal SIGINT pour éviter que le terminal ne ferme l'application
 			return nil
 		}
 
-		// Bloquer tout autre raccourci Ctrl+... non défini dans l'application
 		if event.Modifiers()&tcell.ModCtrl != 0 {
 			if !allowedCtrlKeys[event.Key()] {
 				return nil
 			}
 		}
-
-		// Bloquer les combinaisons Alt (souvent sources de conflits avec le terminal ou l'OS)
 		if event.Modifiers()&tcell.ModAlt != 0 {
 			return nil
 		}
-
 		return event
 	})
 
-	// 2. Raccourcis spécifiques à l'Exploreur (FileList)
 	e.setupExplorerHandlers()
-
-	// 3. Raccourcis spécifiques à l'Éditeur (TextArea)
 	e.setupEditorHandlers()
 }
 
-// showHelp affiche une fenêtre modale avec la liste des raccourcis
 func (e *EditorApp) showHelp() {
 	previousFocus := e.App.GetFocus()
-
 	helpText := tview.NewTextView().
-		SetText(HelpContent).
+		SetText(utils.HelpContent).
 		SetDynamicColors(true).
 		SetScrollable(true).
 		SetTextAlign(tview.AlignLeft)
@@ -82,7 +69,6 @@ func (e *EditorApp) showHelp() {
 		SetTitleAlign(tview.AlignCenter).
 		SetBorderPadding(1, 1, 2, 2)
 
-	// Centre la modale à l'écran
 	helpModal := tview.NewFlex().
 		AddItem(nil, 0, 1, false).
 		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
@@ -106,7 +92,6 @@ func (e *EditorApp) showHelp() {
 	})
 }
 
-// showQuitConfirmation affiche une boîte de dialogue pour confirmer la fermeture de l'application
 func (e *EditorApp) showQuitConfirmation() {
 	modal := tview.NewModal().
 		SetText("Voulez-vous vraiment quitter Hollow ?").
@@ -118,11 +103,9 @@ func (e *EditorApp) showQuitConfirmation() {
 			}
 			e.Pages.RemovePage("quit")
 		})
-
 	e.Pages.AddPage("quit", modal, true, true)
 }
 
-// showDeleteConfirmation affiche une modale pour confirmer la suppression d'un élément
 func (e *EditorApp) showDeleteConfirmation() {
 	index := e.FileList.GetCurrentItem()
 	if index <= 0 || index-1 >= len(e.CurrentFiles) {
@@ -144,16 +127,10 @@ func (e *EditorApp) showDeleteConfirmation() {
 	e.Pages.AddPage("delete", modal, true, true)
 }
 
-// showNewFileDialog affiche un champ de saisie pour créer un nouveau fichier
 func (e *EditorApp) showNewFileDialog() {
-	inputField := tview.NewInputField().
-		SetLabel(" Nom du nouveau fichier: ")
+	inputField := tview.NewInputField().SetLabel(" Nom du nouveau fichier: ")
+	inputField.SetBorder(true).SetTitle(" Nouveau Fichier ").SetTitleAlign(tview.AlignCenter)
 
-	inputField.SetBorder(true).
-		SetTitle(" Nouveau Fichier ").
-		SetTitleAlign(tview.AlignCenter)
-
-	// Centrage simple
 	modal := tview.NewFlex().
 		AddItem(nil, 0, 1, false).
 		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
@@ -182,12 +159,8 @@ func (e *EditorApp) showNewFileDialog() {
 
 // showNewDirDialog affiche un champ de saisie pour créer un nouveau dossier
 func (e *EditorApp) showNewDirDialog() {
-	inputField := tview.NewInputField().
-		SetLabel(" Nom du nouveau dossier: ")
-
-	inputField.SetBorder(true).
-		SetTitle(" Nouveau Dossier ").
-		SetTitleAlign(tview.AlignCenter)
+	inputField := tview.NewInputField().SetLabel(" Nom du nouveau dossier: ")
+	inputField.SetBorder(true).SetTitle(" Nouveau Dossier ").SetTitleAlign(tview.AlignCenter)
 
 	modal := tview.NewFlex().
 		AddItem(nil, 0, 1, false).

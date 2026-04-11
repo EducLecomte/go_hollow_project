@@ -1,4 +1,4 @@
-package main
+package utils
 
 import "fmt"
 
@@ -30,7 +30,7 @@ const (
  `
 )
 
-func formatSize(b int64) string {
+func FormatSize(b int64) string {
 	const unit = 1024
 	if b < unit {
 		return fmt.Sprintf("%d B", b)

@@ -1,9 +1,12 @@
-package main
+package app
 
 import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	"github.com/EducLecomte/go_hollow_project/internal/utils"
+	"github.com/EducLecomte/go_hollow_project/internal/vfs"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -20,13 +23,13 @@ type EditorApp struct {
 	FilePath     string
 	CopiedPath   string
 	CurrentDir   string
-	FileSystem   VFS
-	CurrentFiles []FileInfo
+	FileSystem   vfs.VFS
+	CurrentFiles []vfs.FileInfo
 }
 
 func NewEditorApp() *EditorApp {
 	// Initialisation par défaut en local
-	localFS := &LocalFS{}
+	localFS := &vfs.LocalFS{}
 	wd, err := filepath.Abs(".")
 	if err != nil {
 		wd = "/"
@@ -64,7 +67,7 @@ func (e *EditorApp) setupUI() {
 	})
 	e.FileList.SetFocusFunc(func() {
 		e.FileList.SetBorderColor(tcell.ColorYellow)
-		e.updateStatus(HelpMsgFiles)
+		e.updateStatus(utils.HelpMsgFiles)
 	})
 	e.FileList.SetBlurFunc(func() {
 		e.FileList.SetBorderColor(tcell.ColorWhite)
@@ -85,7 +88,7 @@ func (e *EditorApp) setupUI() {
 		if file.IsDir {
 			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Droits: [white]%s\n[green]Owner: [white]%s", file.Permissions, file.Owner))
 		} else {
-			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", formatSize(file.Size), file.Permissions, file.Owner))
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), file.Permissions, file.Owner))
 		}
 	})
 
@@ -97,14 +100,14 @@ func (e *EditorApp) setupUI() {
 		e.Editor.SetSelectedStyle(tcell.StyleDefault.
 			Background(tcell.ColorWhite).
 			Foreground(tcell.ColorBlack))
-		e.updateStatus(HelpMsgEdit)
+		e.updateStatus(utils.HelpMsgEdit)
 	})
 	e.Editor.SetBlurFunc(func() {
 		e.Editor.SetBorderColor(tcell.ColorWhite)
 	})
 
 	e.Status.SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
-	e.updateStatus(HelpMsgDefault)
+	e.updateStatus(utils.HelpMsgDefault)
 
 	// Layout de la colonne de gauche (Explorateur + Info taille)
 	leftColumn := tview.NewFlex().SetDirection(tview.FlexRow).
@@ -164,9 +167,9 @@ func (e *EditorApp) updateStatusTemp(msg string) {
 		e.App.QueueUpdateDraw(func() {
 			// Restauration du message d'aide selon le focus actuel
 			if e.App.GetFocus() == e.Editor {
-				e.updateStatus(HelpMsgEdit)
+				e.updateStatus(utils.HelpMsgEdit)
 			} else {
-				e.updateStatus(HelpMsgFiles)
+				e.updateStatus(utils.HelpMsgFiles)
 			}
 		})
 	}()
