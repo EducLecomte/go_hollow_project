@@ -146,30 +146,39 @@ func (e *EditorApp) handleFileSelection(index int) {
 
 // showHelp affiche une fenêtre modale avec la liste des raccourcis
 func (e *EditorApp) showHelp() {
+	// On sauvegarde le focus actuel pour le restaurer plus tard
+	previousFocus := e.App.GetFocus()
+
 	helpText := tview.NewTextView().
 		SetText(HelpContent).
 		SetDynamicColors(true).
+		SetScrollable(true).
+		SetWrap(true).
 		SetTextAlign(tview.AlignLeft)
 
 	helpText.SetBorder(true).
-		SetTitle(" Aide - Raccourcis (Echap pour fermer) ").
-		SetTitleAlign(tview.AlignCenter)
+		SetTitle(" Aide Hollow - Raccourcis ").
+		SetTitleAlign(tview.AlignCenter).
+		SetBorderPadding(1, 1, 2, 2)
 
 	// Centre la modale à l'écran
 	helpModal := tview.NewFlex().
 		AddItem(nil, 0, 1, false).
 		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
 			AddItem(nil, 0, 1, false).
-			AddItem(helpText, 18, 1, true).
-			AddItem(nil, 0, 1, false), 60, 1, true).
+			AddItem(helpText, 20, 1, true).
+			AddItem(nil, 0, 1, false), 65, 1, true).
 		AddItem(nil, 0, 1, false)
 
 	e.Pages.AddPage("help", helpModal, true, true)
 	e.App.SetFocus(helpText)
 
 	helpText.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyF1 {
+		if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyF1 || event.Rune() == 'q' {
 			e.Pages.RemovePage("help")
+			if previousFocus != nil {
+				e.App.SetFocus(previousFocus)
+			}
 			return nil
 		}
 		return event
