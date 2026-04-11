@@ -3,9 +3,28 @@ package main
 import "fmt"
 
 const (
-	HelpMsgDefault = "Prêt - TAB: Éditer | Ctrl+S: Sauver | Ctrl+X: Quitter"
-	HelpMsgEdit    = "Focus: Éditeur (Ctrl+X pour revenir aux fichiers)"
-	HelpMsgFiles   = "Focus: Fichiers (TAB pour éditer)"
+	HelpMsgDefault = "F1: Aide | TAB: Éditer | Ctrl+F: Chercher | Ctrl+S: Sauver | Ctrl+X: Quitter"
+	HelpMsgEdit    = "F1: Aide | Ctrl+F: Chercher | Ctrl+S: Sauver | Ctrl+K: Couper | Ctrl+C/V: Copier/Coller | Ctrl+X: Retour"
+	HelpMsgFiles   = "F1: Aide | TAB: Éditer | Ctrl+F: Chercher | Ctrl+S: Sauver | Ctrl+X: Quitter"
+
+	HelpContent = `
+ [yellow]Navigation & Système[white]
+ --------------------
+ F1          : Afficher cette aide
+ F10         : Quitter l'application
+ TAB         : Basculer vers l'Éditeur
+ Ctrl + X    : Quitter l'app (depuis l'explorateur)
+ Ctrl + X    : Revenir à l'explorateur (depuis l'éditeur)
+ Entrée      : Ouvrir un fichier / Entrer dans un dossier
+
+ [yellow]Édition[white]
+ -------
+ Ctrl + S    : Sauvegarder le fichier courant
+ Ctrl + F    : Rechercher dans le fichier ou la liste
+ Ctrl + K    : Couper la ligne de texte (Nano style)
+ Ctrl + C    : Copier le texte vers le presse-papier
+ Ctrl + V    : Coller le texte depuis le presse-papier
+ `
 )
 
 func formatSize(b int64) string {
