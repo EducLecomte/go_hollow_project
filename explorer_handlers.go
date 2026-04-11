@@ -14,7 +14,7 @@ func (e *EditorApp) setupExplorerHandlers() {
 			e.App.SetFocus(e.Editor)
 			return nil
 		case tcell.KeyCtrlX:
-			e.App.Stop()
+			e.showQuitConfirmation()
 			return nil
 		case tcell.KeyCtrlS:
 			e.saveFile()

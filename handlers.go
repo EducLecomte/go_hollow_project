@@ -13,7 +13,7 @@ func (e *EditorApp) setupHandlers() {
 			e.showHelp()
 			return nil
 		case tcell.KeyF10:
-			e.App.Stop()
+			e.showQuitConfirmation()
 			return nil
 		case tcell.KeyCtrlC:
 			// Bloque le signal SIGINT pour éviter que le terminal ne ferme l'application
@@ -66,6 +66,21 @@ func (e *EditorApp) showHelp() {
 		}
 		return event
 	})
+}
+
+// showQuitConfirmation affiche une boîte de dialogue pour confirmer la fermeture de l'application
+func (e *EditorApp) showQuitConfirmation() {
+	modal := tview.NewModal().
+		SetText("Voulez-vous vraiment quitter Hollow ?").
+		AddButtons([]string{"Oui", "Non"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			if buttonLabel == "Oui" {
+				e.App.Stop()
+			}
+			e.Pages.RemovePage("quit")
+		})
+
+	e.Pages.AddPage("quit", modal, true, true)
 }
 
 // showNewFileDialog affiche un champ de saisie pour créer un nouveau fichier
