@@ -3,13 +3,15 @@ package main
 import (
 	"io"
 	"os"
+	"time"
 )
 
 // FileInfo représente un fichier ou dossier de manière universelle (Local, FTP, Zip)
 type FileInfo struct {
-	Name  string
-	IsDir bool
-	Size  int64
+	Name    string
+	IsDir   bool
+	Size    int64
+	ModTime time.Time
 }
 
 // VFS est l'interface que devront implémenter tes différents modules
@@ -30,11 +32,16 @@ func (l *LocalFS) List(path string) ([]FileInfo, error) {
 
 	var files []FileInfo
 	for _, entry := range entries {
-		info, _ := entry.Info()
+		info, err := entry.Info()
+		if err != nil {
+			// Gérer l'erreur ou ignorer le fichier si les infos ne sont pas accessibles
+			continue
+		}
 		files = append(files, FileInfo{
-			Name:  entry.Name(),
-			IsDir: entry.IsDir(),
-			Size:  info.Size(),
+			Name:    entry.Name(),
+			IsDir:   entry.IsDir(),
+			Size:    info.Size(),
+			ModTime: info.ModTime(),
 		})
 	}
 	return files, nil

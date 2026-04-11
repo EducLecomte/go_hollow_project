@@ -78,10 +78,12 @@ func (e *EditorApp) setupUI() {
 			return
 		}
 		file := e.CurrentFiles[index-1]
+		modTime := file.ModTime.Format("2006-01-02 15:04")
+
 		if file.IsDir {
-			e.FileSizeBox.SetText("[yellow]Directory")
+			e.FileSizeBox.SetText(fmt.Sprintf("[yellow]Dossier\n[blue]Modifié: [white]%s", modTime))
 		} else {
-			e.FileSizeBox.SetText(fmt.Sprintf("[blue]Size: [white]%s", formatSize(file.Size)))
+			e.FileSizeBox.SetText(fmt.Sprintf("[blue]Taille: [white]%s\n[blue]Modifié: [white]%s", formatSize(file.Size), modTime))
 		}
 	})
 
@@ -101,7 +103,7 @@ func (e *EditorApp) setupUI() {
 	// Layout de la colonne de gauche (Explorateur + Info taille)
 	leftColumn := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(e.FileList, 0, 1, true).
-		AddItem(e.FileSizeBox, 3, 0, false)
+		AddItem(e.FileSizeBox, 4, 0, false)
 
 	// Layout
 	mainFlex := tview.NewFlex().SetDirection(tview.FlexRow).

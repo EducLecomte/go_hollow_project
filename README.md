@@ -42,10 +42,8 @@ type VFS interface {
 | `Ctrl + X` | Revenir à la liste (depuis l'éditeur) / Quitter (depuis la liste) |
 | `F10` | Quitter l'application |
 | `Ctrl + S` | Sauvegarder le fichier courant |
-| `Ctrl + F` | Lancer la recherche |
 | `Ctrl + K` | Couper la ligne actuelle (Style Nano) |
-| `Ctrl + C` | Copier le texte |
-| `Ctrl + V` | Coller le texte |
+| `Ctrl + U / V` | Coller le texte |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier |
 
 ## 📦 Installation & Utilisation
@@ -75,4 +73,4 @@ go run .
 - [ ] **Recherche avancée** : Logique de recherche textuelle avec surlignage.
 
 ---
-*Dernière mise à jour : Samedi 11 Avril 2026 - 08:54*
+*Dernière mise à jour : Samedi 11 Avril 2026 - 17:12*
