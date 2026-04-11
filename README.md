@@ -74,6 +74,7 @@ go run .
 - Lecture et écriture réelle sur le disque.
 - Architecture factorisée pour la maintenabilité.
 - Barre de chemin dynamique et interface réactive.
+- Mécanique de "Cut & Paste" de ligne entière avec gestion automatique du décalage (style Nano/Mcedit).
 
 ### En cours / À venir
 - [ ] **Client FTP** : Implémentation de `FTPFS` pour l'édition distante.
@@ -81,4 +82,4 @@ go run .
 - [ ] **Recherche avancée** : Logique de recherche textuelle avec surlignage.
 
 ---
-*Dernière mise à jour : Samedi 11 Avril 2026 - 17:12*
+*Dernière mise à jour : Samedi 11 Avril 2026 - 22:00*
