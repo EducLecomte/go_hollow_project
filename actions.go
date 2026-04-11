@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -113,4 +114,10 @@ func (e *EditorApp) deleteElement(path string) {
 	}
 	e.refreshFileList()
 	e.updateStatus(fmt.Sprintf("[green]Supprimé: %s", filepath.Base(path)))
+}
+
+// saveLastDir enregistre le répertoire actuel dans un fichier temporaire pour le shell
+func (e *EditorApp) saveLastDir() {
+	path := fmt.Sprintf("/tmp/hollow_cwd_%s", os.Getenv("USER"))
+	_ = os.WriteFile(path, []byte(e.CurrentDir), 0644)
 }

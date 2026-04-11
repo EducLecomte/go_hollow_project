@@ -76,7 +76,15 @@ func (e *EditorApp) pasteText(isUncut bool) {
 	for i := 0; i < row && i < len(lines); i++ {
 		pos += len(lines[i]) + 1
 	}
-	pos += col
+
+	if row < len(lines) {
+		if col > len(lines[row]) {
+			col = len(lines[row])
+		}
+		pos += col
+	} else {
+		pos = len(content)
+	}
 
 	e.Editor.Replace(pos, 0, text)
 

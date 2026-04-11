@@ -113,6 +113,7 @@ func (e *EditorApp) showQuitConfirmation() {
 		AddButtons([]string{"Oui", "Non"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			if buttonLabel == "Oui" {
+				e.saveLastDir()
 				e.App.Stop()
 			}
 			e.Pages.RemovePage("quit")
