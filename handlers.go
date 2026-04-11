@@ -10,13 +10,26 @@ func (e *EditorApp) setupHandlers() {
 	e.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyF1:
+			// Si une modale est déjà ouverte, on laisse l'événement circuler
+			// sans ouvrir une nouvelle fenêtre d'aide (évite le blocage)
+			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
+				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") {
+				return event
+			}
 			e.showHelp()
 			return nil
 		case tcell.KeyF10:
+			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
+				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") {
+				return event
+			}
 			e.showQuitConfirmation()
 			return nil
 		case tcell.KeyCtrlC:
-			// Bloque le signal SIGINT pour éviter que le terminal ne ferme l'application
+			// Si l'exploreur a le focus, on laisse passer pour copier le fichier
+			if e.FileList.HasFocus() {
+				return event
+			}
 			return nil
 		}
 		return event
@@ -86,8 +99,7 @@ func (e *EditorApp) showQuitConfirmation() {
 // showNewFileDialog affiche un champ de saisie pour créer un nouveau fichier
 func (e *EditorApp) showNewFileDialog() {
 	inputField := tview.NewInputField().
-		SetLabel(" Nom du nouveau fichier: ").
-		SetFieldWidth(30)
+		SetLabel(" Nom du nouveau fichier: ")
 
 	inputField.SetBorder(true).
 		SetTitle(" Nouveau Fichier ").
@@ -99,7 +111,7 @@ func (e *EditorApp) showNewFileDialog() {
 		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
 			AddItem(nil, 0, 1, false).
 			AddItem(inputField, 3, 1, true).
-			AddItem(nil, 0, 1, false), 40, 1, true).
+			AddItem(nil, 0, 1, false), 60, 1, true).
 		AddItem(nil, 0, 1, false)
 
 	e.Pages.AddPage("newfile", modal, true, true)
@@ -123,8 +135,7 @@ func (e *EditorApp) showNewFileDialog() {
 // showNewDirDialog affiche un champ de saisie pour créer un nouveau dossier
 func (e *EditorApp) showNewDirDialog() {
 	inputField := tview.NewInputField().
-		SetLabel(" Nom du nouveau dossier: ").
-		SetFieldWidth(30)
+		SetLabel(" Nom du nouveau dossier: ")
 
 	inputField.SetBorder(true).
 		SetTitle(" Nouveau Dossier ").
@@ -135,7 +146,7 @@ func (e *EditorApp) showNewDirDialog() {
 		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
 			AddItem(nil, 0, 1, false).
 			AddItem(inputField, 3, 1, true).
-			AddItem(nil, 0, 1, false), 40, 1, true).
+			AddItem(nil, 0, 1, false), 60, 1, true).
 		AddItem(nil, 0, 1, false)
 
 	e.Pages.AddPage("newdir", modal, true, true)

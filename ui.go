@@ -18,6 +18,7 @@ type EditorApp struct {
 	Status       *tview.TextView
 	Pages        *tview.Pages
 	FilePath     string
+	CopiedPath   string
 	CurrentDir   string
 	FileSystem   VFS
 	CurrentFiles []FileInfo

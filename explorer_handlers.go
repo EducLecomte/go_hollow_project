@@ -25,6 +25,18 @@ func (e *EditorApp) setupExplorerHandlers() {
 		case tcell.KeyCtrlD:
 			e.showNewDirDialog()
 			return nil
+		case tcell.KeyCtrlC:
+			index := e.FileList.GetCurrentItem()
+			if index > 0 && index-1 < len(e.CurrentFiles) {
+				file := e.CurrentFiles[index-1]
+				if !file.IsDir {
+					e.prepareCopyFile(filepath.Join(e.CurrentDir, file.Name))
+				}
+			}
+			return nil
+		case tcell.KeyCtrlV:
+			e.pasteFile()
+			return nil
 		}
 		return event
 	})

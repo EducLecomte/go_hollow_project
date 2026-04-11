@@ -73,3 +73,34 @@ func (e *EditorApp) createDir(name string) {
 	e.refreshFileList()
 	e.updateStatus(fmt.Sprintf("[green]Dossier créé: %s", name))
 }
+
+func (e *EditorApp) prepareCopyFile(path string) {
+	e.CopiedPath = path
+	e.updateStatusTemp(fmt.Sprintf("Fichier prêt à copier: %s", filepath.Base(path)))
+}
+
+func (e *EditorApp) pasteFile() {
+	if e.CopiedPath == "" {
+		e.updateStatus("[red]Rien à coller")
+		return
+	}
+
+	baseName := filepath.Base(e.CopiedPath)
+	dst := filepath.Join(e.CurrentDir, baseName)
+
+	// Si on colle dans le même dossier, on ajoute un suffixe pour éviter l'écrasement
+	if e.CopiedPath == dst {
+		ext := filepath.Ext(baseName)
+		name := strings.TrimSuffix(baseName, ext)
+		dst = filepath.Join(e.CurrentDir, name+"_copy"+ext)
+	}
+
+	err := e.FileSystem.Copy(e.CopiedPath, dst)
+	if err != nil {
+		e.updateStatus(fmt.Sprintf("[red]Erreur collage: %v", err))
+		return
+	}
+
+	e.refreshFileList()
+	e.updateStatus(fmt.Sprintf("[green]Fichier collé: %s", filepath.Base(dst)))
+}
