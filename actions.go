@@ -41,6 +41,8 @@ func (e *EditorApp) saveFile() {
 	if err != nil {
 		e.updateStatus(fmt.Sprintf("[red]Erreur de sauvegarde: %v", err))
 	} else {
+		// Rafraîchir la liste pour mettre à jour la taille affichée
+		e.refreshFileList()
 		e.updateStatus(fmt.Sprintf("[green]Enregistré: %s", e.FilePath))
 	}
 }

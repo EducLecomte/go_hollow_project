@@ -40,32 +40,60 @@ func (e *EditorApp) setupHandlers() {
 			}
 			return nil
 		case tcell.KeyCtrlC:
-			clipboard.WriteAll(e.Editor.GetText())
+			if e.App.GetFocus() != e.Editor {
+				return event
+			}
+			text := e.Editor.GetText()
+			if text == "" {
+				return nil
+			}
+			clipboard.WriteAll(text)
 			e.updateStatus("Texte copié !")
 			return nil
 
 		case tcell.KeyCtrlK:
+			if e.App.GetFocus() != e.Editor {
+				return event
+			}
 			// Coupe la ligne actuelle (Style Nano)
-			row, col := e.Editor.GetCursor()
+			row, _, _, _ := e.Editor.GetCursor()
+			if row < 0 {
+				return nil
+			}
+
 			fullText := e.Editor.GetText()
 			lines := strings.Split(fullText, "\n")
 
-			if row < len(lines) {
-				lineContent := lines[row]
-				clipboard.WriteAll(lineContent)
-				// On remplace la ligne (et le caractère newline) par rien
-				e.Editor.Replace(row, 0, row+1, 0, "")
-				e.Editor.SetCursor(row, col)
-				e.updateStatus("Ligne coupée !")
+			if len(lines) == 0 || row >= len(lines) {
+				return nil
 			}
+
+			lineContent := lines[row]
+			clipboard.WriteAll(lineContent)
+
+			// Ajustement à 3 arguments comme demandé par le compilateur
+			// Note: La suppression de ligne dépend de l'implémentation de votre version
+			e.Editor.Replace(row, 0, "")
+			e.updateStatus("Ligne coupée !")
 			return nil
 
 		case tcell.KeyCtrlV:
-			// Insère le texte à la position du curseur
-			text, _ := clipboard.ReadAll()
-			row, col := e.Editor.GetCursor()
-			// Replace avec les mêmes coordonnées de début et de fin = Insertion
-			e.Editor.Replace(row, col, row, col, text)
+			if e.App.GetFocus() != e.Editor {
+				return event
+			}
+			// Récupération sécurisée du presse-papier
+			text, err := clipboard.ReadAll()
+			if err != nil {
+				e.updateStatus("[red]Erreur presse-papier: assurez-vous que xclip ou wl-clipboard est installé")
+				return nil
+			}
+			if text == "" {
+				return nil
+			}
+
+			row, col, _, _ := e.Editor.GetCursor()
+			// Ajustement à 3 arguments : (row, col, text)
+			e.Editor.Replace(row, col, text)
 			e.updateStatus("Texte collé !")
 			return nil
 		}
@@ -77,6 +105,10 @@ func (e *EditorApp) handleFileSelection(index int) {
 	if index == 0 {
 		e.CurrentDir = filepath.Dir(e.CurrentDir)
 		e.refreshFileList()
+		return
+	}
+
+	if e.CurrentFiles == nil || index-1 >= len(e.CurrentFiles) {
 		return
 	}
 

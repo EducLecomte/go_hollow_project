@@ -25,7 +25,10 @@ type EditorApp struct {
 func NewEditorApp() *EditorApp {
 	// Initialisation par défaut en local
 	localFS := &LocalFS{}
-	wd, _ := filepath.Abs(".")
+	wd, err := filepath.Abs(".")
+	if err != nil {
+		wd = "/"
+	}
 
 	e := &EditorApp{
 		App:         tview.NewApplication(),
@@ -102,6 +105,7 @@ func (e *EditorApp) refreshFileList() {
 
 	files, err := e.FileSystem.List(e.CurrentDir)
 	if err != nil {
+		e.CurrentFiles = nil
 		e.updateStatus(fmt.Sprintf("[red]Erreur listage: %v", err))
 		return
 	}
