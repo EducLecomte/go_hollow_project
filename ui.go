@@ -57,6 +57,8 @@ func (e *EditorApp) setupUI() {
 
 	e.FileList.SetBorder(true).SetTitle(" Exploreur ").SetBorderColor(tcell.ColorYellow)
 	e.FileList.ShowSecondaryText(false) // Rend la liste compacte (une seule ligne)
+	e.FileList.SetSelectedBackgroundColor(tcell.ColorWhite).
+		SetSelectedTextColor(tcell.ColorBlack)
 	e.FileList.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
 		e.handleFileSelection(index)
 	})
@@ -81,9 +83,9 @@ func (e *EditorApp) setupUI() {
 		file := e.CurrentFiles[index-1]
 
 		if file.IsDir {
-			e.FileSizeBox.SetText(fmt.Sprintf("[yellow]Type: [white]Dossier\n[blue]Droits: [white]%s\n[blue]Owner: [white]%s", file.Permissions, file.Owner))
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Droits: [white]%s\n[green]Owner: [white]%s", file.Permissions, file.Owner))
 		} else {
-			e.FileSizeBox.SetText(fmt.Sprintf("[blue]Taille: [white]%s\n[blue]Droits: [white]%s\n[blue]Owner: [white]%s", formatSize(file.Size), file.Permissions, file.Owner))
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", formatSize(file.Size), file.Permissions, file.Owner))
 		}
 	})
 
@@ -91,6 +93,10 @@ func (e *EditorApp) setupUI() {
 	e.Editor.SetPlaceholder("Entrez votre texte ici... (Ctrl+S pour sauver, Ctrl+K/U pour couper/coller)")
 	e.Editor.SetFocusFunc(func() {
 		e.Editor.SetBorderColor(tcell.ColorYellow)
+		// Force le style de sélection en noir sur blanc pour l'éditeur
+		e.Editor.SetSelectedStyle(tcell.StyleDefault.
+			Background(tcell.ColorWhite).
+			Foreground(tcell.ColorBlack))
 		e.updateStatus(HelpMsgEdit)
 	})
 	e.Editor.SetBlurFunc(func() {
@@ -103,7 +109,7 @@ func (e *EditorApp) setupUI() {
 	// Layout de la colonne de gauche (Explorateur + Info taille)
 	leftColumn := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(e.FileList, 0, 1, true).
-		AddItem(e.FileSizeBox, 6, 0, false)
+		AddItem(e.FileSizeBox, 5, 0, false)
 
 	// Layout
 	mainFlex := tview.NewFlex().SetDirection(tview.FlexRow).
@@ -118,7 +124,8 @@ func (e *EditorApp) setupUI() {
 
 func (e *EditorApp) refreshFileList() {
 	e.FileList.Clear()
-	e.FileList.AddItem("..", "Retour au parent", '.', nil)
+	header := fmt.Sprintf("%-25s [green]Date", "..")
+	e.FileList.AddItem(header, "Retour au parent", '.', nil)
 
 	files, err := e.FileSystem.List(e.CurrentDir)
 	if err != nil {
@@ -133,11 +140,11 @@ func (e *EditorApp) refreshFileList() {
 		var displayName string
 		modTimeStr := f.ModTime.Format("2006-01-02 15:04")
 		if f.IsDir {
-			// Dossier avec sa date de modification
-			displayName = fmt.Sprintf("[yellow]%-25s [blue]%s", f.Name+"/", modTimeStr)
+			// Dossier : On accole le slash au nom pour une identification immédiate, puis on aligne la colonne
+			displayName = fmt.Sprintf("[darkorange]%-25s [gray]%s", f.Name+"/", modTimeStr)
 		} else {
-			// Fichier avec sa date de modification
-			displayName = fmt.Sprintf("[white]%-25s [green]%s", f.Name, modTimeStr)
+			// Fichier : Nom sans tag, date en gris pour l'uniformité
+			displayName = fmt.Sprintf("%-25s [gray]%s", f.Name, modTimeStr)
 		}
 		e.FileList.AddItem(displayName, "", 0, nil)
 	}
