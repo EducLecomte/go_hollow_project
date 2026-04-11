@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"path/filepath"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -13,23 +16,22 @@ func (e *EditorApp) setupHandlers() {
 			// Si une modale est déjà ouverte, on laisse l'événement circuler
 			// sans ouvrir une nouvelle fenêtre d'aide (évite le blocage)
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
-				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") {
+				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") ||
+				e.Pages.HasPage("delete") {
 				return event
 			}
 			e.showHelp()
 			return nil
 		case tcell.KeyF10:
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
-				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") {
+				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") ||
+				e.Pages.HasPage("delete") {
 				return event
 			}
 			e.showQuitConfirmation()
 			return nil
 		case tcell.KeyCtrlC:
-			// Si l'exploreur a le focus, on laisse passer pour copier le fichier
-			if e.FileList.HasFocus() {
-				return event
-			}
+			// Bloque le signal SIGINT pour éviter que le terminal ne ferme l'application
 			return nil
 		}
 		return event
@@ -94,6 +96,28 @@ func (e *EditorApp) showQuitConfirmation() {
 		})
 
 	e.Pages.AddPage("quit", modal, true, true)
+}
+
+// showDeleteConfirmation affiche une modale pour confirmer la suppression d'un élément
+func (e *EditorApp) showDeleteConfirmation() {
+	index := e.FileList.GetCurrentItem()
+	if index <= 0 || index-1 >= len(e.CurrentFiles) {
+		return
+	}
+	file := e.CurrentFiles[index-1]
+	path := filepath.Join(e.CurrentDir, file.Name)
+
+	modal := tview.NewModal().
+		SetText(fmt.Sprintf("Voulez-vous vraiment supprimer %s ?", file.Name)).
+		AddButtons([]string{"Supprimer", "Annuler"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			if buttonLabel == "Supprimer" {
+				e.deleteElement(path)
+			}
+			e.Pages.RemovePage("delete")
+			e.App.SetFocus(e.FileList)
+		})
+	e.Pages.AddPage("delete", modal, true, true)
 }
 
 // showNewFileDialog affiche un champ de saisie pour créer un nouveau fichier

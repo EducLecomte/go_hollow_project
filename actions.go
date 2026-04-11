@@ -104,3 +104,13 @@ func (e *EditorApp) pasteFile() {
 	e.refreshFileList()
 	e.updateStatus(fmt.Sprintf("[green]Fichier collé: %s", filepath.Base(dst)))
 }
+
+func (e *EditorApp) deleteElement(path string) {
+	err := e.FileSystem.Remove(path)
+	if err != nil {
+		e.updateStatus(fmt.Sprintf("[red]Erreur suppression: %v", err))
+		return
+	}
+	e.refreshFileList()
+	e.updateStatus(fmt.Sprintf("[green]Supprimé: %s", filepath.Base(path)))
+}

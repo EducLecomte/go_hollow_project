@@ -89,7 +89,7 @@ func (e *EditorApp) setupUI() {
 	})
 
 	e.Editor.SetBorder(true).SetTitle(" Éditeur ").SetBorderColor(tcell.ColorWhite)
-	e.Editor.SetPlaceholder("Entrez votre texte ici... (Ctrl+S pour sauver, Ctrl+C/V pour copier/coller)")
+	e.Editor.SetPlaceholder("Entrez votre texte ici... (Ctrl+S pour sauver, Ctrl+K/U pour couper/coller)")
 	e.Editor.SetFocusFunc(func() {
 		e.Editor.SetBorderColor(tcell.ColorYellow)
 		e.updateStatus(HelpMsgEdit)

@@ -43,11 +43,12 @@ type VFS interface {
 | `F10` | Quitter l'application |
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |
-| `Ctrl + C` | Copier le fichier sélectionné |
-| `Ctrl + V` | Coller le fichier dans le dossier actuel |
+| `Ctrl + R` | Supprimer le fichier ou dossier sélectionné |
+| `Ctrl + K` | Copier le fichier sélectionné |
+| `Ctrl + U` | Coller le fichier dans le dossier actuel |
 | `Ctrl + S` | Sauvegarder le fichier courant |
-| `Ctrl + K` | Couper la ligne actuelle (Style Nano) |
-| `Ctrl + U / V` | Coller le texte |
+| `Ctrl + K` | Couper la ligne actuelle (Éditeur) |
+| `Ctrl + U / V` | Coller le texte (Éditeur) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier |
 
 ## 📦 Installation & Utilisation

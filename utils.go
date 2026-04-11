@@ -3,9 +3,9 @@ package main
 import "fmt"
 
 const (
-	HelpMsgDefault = "F1: Aide | TAB: Editer | Ctrl+F: Fichier | Ctrl+D: Dossier | Ctrl+C/V: Copier/Coller | Ctrl+X: Quitter"
+	HelpMsgDefault = "F1: Aide | TAB: Editer | Ctrl+F: Fich. | Ctrl+D: Doss. | Ctrl+R: Suppr. | Ctrl+K/U: C/V | Ctrl+X: Quit"
 	HelpMsgEdit    = "F1: Aide | Ctrl+S: Sauver | Ctrl+K: Couper | Ctrl+U/V: Coller | Ctrl+X: Retour"
-	HelpMsgFiles   = "F1: Aide | TAB: Editer | Ctrl+F: Fichier | Ctrl+D: Dossier | Ctrl+C/V: Copier/Coller | Ctrl+X: Quitter"
+	HelpMsgFiles   = "F1: Aide | TAB: Editer | Ctrl+F: Fich. | Ctrl+D: Doss. | Ctrl+R: Suppr. | Ctrl+K/U: C/V | Ctrl+X: Quit"
 
 	HelpContent = `
  [yellow]Navigation & Système[white]
@@ -16,8 +16,9 @@ const (
  Ctrl + X    : Quitter l'app (depuis l'explorateur)
  Ctrl + F    : Créer un nouveau fichier (depuis l'explorateur)
  Ctrl + D    : Créer un nouveau dossier (depuis l'explorateur)
- Ctrl + C    : Copier un fichier (depuis l'explorateur)
- Ctrl + V    : Coller un fichier (depuis l'explorateur)
+ Ctrl + R    : Supprimer un fichier/dossier (depuis l'explorateur)
+ Ctrl + K    : Copier un fichier (depuis l'explorateur)
+ Ctrl + U    : Coller un fichier (depuis l'explorateur)
  Ctrl + X    : Revenir à l'explorateur (depuis l'éditeur)
  Entrée      : Ouvrir un fichier / Entrer dans un dossier
 

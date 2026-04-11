@@ -25,7 +25,7 @@ func (e *EditorApp) setupExplorerHandlers() {
 		case tcell.KeyCtrlD:
 			e.showNewDirDialog()
 			return nil
-		case tcell.KeyCtrlC:
+		case tcell.KeyCtrlK:
 			index := e.FileList.GetCurrentItem()
 			if index > 0 && index-1 < len(e.CurrentFiles) {
 				file := e.CurrentFiles[index-1]
@@ -34,8 +34,11 @@ func (e *EditorApp) setupExplorerHandlers() {
 				}
 			}
 			return nil
-		case tcell.KeyCtrlV:
+		case tcell.KeyCtrlU:
 			e.pasteFile()
+			return nil
+		case tcell.KeyCtrlR:
+			e.showDeleteConfirmation()
 			return nil
 		}
 		return event
