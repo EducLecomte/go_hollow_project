@@ -52,7 +52,7 @@ func NewEditorApp() *EditorApp {
 func (e *EditorApp) setupUI() {
 	e.PathBar.SetDynamicColors(true).
 		SetTextAlign(tview.AlignLeft).
-		SetBackgroundColor(tcell.ColorGreen)
+		SetBackgroundColor(tcell.ColorDarkGreen)
 
 	e.FileList.SetBorder(true).SetTitle(" Exploreur ").SetBorderColor(tcell.ColorYellow)
 	e.FileList.ShowSecondaryText(false) // Rend la liste compacte (une seule ligne)

@@ -67,3 +67,40 @@ func (e *EditorApp) showHelp() {
 		return event
 	})
 }
+
+// showNewFileDialog affiche un champ de saisie pour créer un nouveau fichier
+func (e *EditorApp) showNewFileDialog() {
+	inputField := tview.NewInputField().
+		SetLabel(" Nom du nouveau fichier: ").
+		SetFieldWidth(30)
+
+	inputField.SetBorder(true).
+		SetTitle(" Nouveau Fichier ").
+		SetTitleAlign(tview.AlignCenter)
+
+	// Centrage simple
+	modal := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(inputField, 3, 1, true).
+			AddItem(nil, 0, 1, false), 40, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	e.Pages.AddPage("newfile", modal, true, true)
+	e.App.SetFocus(inputField)
+
+	inputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			name := inputField.GetText()
+			if name != "" {
+				e.createFile(name)
+				e.App.SetFocus(e.Editor)
+			}
+			e.Pages.RemovePage("newfile")
+		} else if key == tcell.KeyEsc {
+			e.Pages.RemovePage("newfile")
+			e.App.SetFocus(e.FileList)
+		}
+	})
+}

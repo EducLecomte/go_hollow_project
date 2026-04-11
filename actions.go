@@ -49,3 +49,16 @@ func (e *EditorApp) saveFile() {
 		e.updateStatus(fmt.Sprintf("[green]Enregistré: %s", e.FilePath))
 	}
 }
+
+func (e *EditorApp) createFile(name string) {
+	path := filepath.Join(e.CurrentDir, name)
+	// On écrit un fichier vide
+	err := e.FileSystem.Write(path, strings.NewReader(""))
+	if err != nil {
+		e.updateStatus(fmt.Sprintf("[red]Erreur création: %v", err))
+		return
+	}
+	e.refreshFileList()
+	e.openFile(path)
+	e.updateStatus(fmt.Sprintf("[green]Fichier créé: %s", name))
+}
