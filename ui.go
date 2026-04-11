@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -53,10 +54,17 @@ func (e *EditorApp) setupUI() {
 		SetTextAlign(tview.AlignLeft).
 		SetBackgroundColor(tcell.ColorGreen)
 
-	e.FileList.SetBorder(true).SetTitle(" Explorer ")
+	e.FileList.SetBorder(true).SetTitle(" Exploreur ").SetBorderColor(tcell.ColorYellow)
 	e.FileList.ShowSecondaryText(false) // Rend la liste compacte (une seule ligne)
 	e.FileList.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
 		e.handleFileSelection(index)
+	})
+	e.FileList.SetFocusFunc(func() {
+		e.FileList.SetBorderColor(tcell.ColorYellow)
+		e.updateStatus(HelpMsgFiles)
+	})
+	e.FileList.SetBlurFunc(func() {
+		e.FileList.SetBorderColor(tcell.ColorWhite)
 	})
 
 	// Encart pour le poids du fichier
@@ -77,8 +85,15 @@ func (e *EditorApp) setupUI() {
 		}
 	})
 
-	e.Editor.SetBorder(true).SetTitle(" Éditeur ")
+	e.Editor.SetBorder(true).SetTitle(" Éditeur ").SetBorderColor(tcell.ColorWhite)
 	e.Editor.SetPlaceholder("Entrez votre texte ici... (Ctrl+S pour sauver, Ctrl+C/V pour copier/coller)")
+	e.Editor.SetFocusFunc(func() {
+		e.Editor.SetBorderColor(tcell.ColorYellow)
+		e.updateStatus(HelpMsgEdit)
+	})
+	e.Editor.SetBlurFunc(func() {
+		e.Editor.SetBorderColor(tcell.ColorWhite)
+	})
 
 	e.Status.SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
 	e.updateStatus(HelpMsgDefault)
@@ -124,4 +139,22 @@ func (e *EditorApp) refreshFileList() {
 func (e *EditorApp) updateStatus(msg string) {
 	// On s'assure que les messages s'affichent sur une seule ligne
 	e.Status.SetText(fmt.Sprintf("[yellow]%s", msg))
+}
+
+// updateStatusTemp affiche un message puis restaure les raccourcis après 5 secondes
+func (e *EditorApp) updateStatusTemp(msg string) {
+	e.updateStatus(msg)
+
+	go func() {
+		time.Sleep(5 * time.Second)
+		// tview n'est pas thread-safe, on utilise QueueUpdateDraw pour mettre à jour l'UI
+		e.App.QueueUpdateDraw(func() {
+			// Restauration du message d'aide selon le focus actuel
+			if e.App.GetFocus() == e.Editor {
+				e.updateStatus(HelpMsgEdit)
+			} else {
+				e.updateStatus(HelpMsgFiles)
+			}
+		})
+	}()
 }

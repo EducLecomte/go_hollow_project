@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 )
 
 func (e *EditorApp) setupHandlers() {
+	// 1. Raccourcis Globaux (Application)
 	e.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyF1:
@@ -18,87 +20,106 @@ func (e *EditorApp) setupHandlers() {
 		case tcell.KeyF10:
 			e.App.Stop()
 			return nil
-		case tcell.KeyTab:
-			if e.App.GetFocus() == e.FileList {
-				e.App.SetFocus(e.Editor)
-				e.updateStatus(HelpMsgEdit)
+		case tcell.KeyCtrlC:
+			// Si l'éditeur n'a pas le focus, on consomme l'événement (nil) pour éviter
+			// que le terminal n'intercepte le signal SIGINT et ne ferme l'application.
+			// Si l'éditeur a le focus, on laisse l'événement passer pour qu'il soit géré par l'éditeur.
+			if e.App.GetFocus() != e.Editor {
 				return nil
 			}
-			return event
+		}
+		return event
+	})
+
+	// 2. Raccourcis spécifiques à l'Exploreur (FileList)
+	e.FileList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyTab:
+			e.App.SetFocus(e.Editor)
+			return nil
+		case tcell.KeyCtrlX:
+			e.App.Stop()
+			return nil
 		case tcell.KeyCtrlS:
 			e.saveFile()
 			return nil
 		case tcell.KeyCtrlF:
-			e.updateStatus("[blue]Recherche... (Fonctionnalité en cours de développement)")
-			return nil
-		case tcell.KeyCtrlX:
-			if e.App.GetFocus() == e.Editor {
-				e.App.SetFocus(e.FileList)
-				e.updateStatus(HelpMsgFiles)
-			} else {
-				e.App.Stop()
-			}
-			return nil
-		case tcell.KeyCtrlC:
-			if e.App.GetFocus() != e.Editor {
-				return event
-			}
-			text := e.Editor.GetText()
-			if text == "" {
-				return nil
-			}
-			clipboard.WriteAll(text)
-			e.updateStatus("Texte copié !")
-			return nil
-
-		case tcell.KeyCtrlK:
-			if e.App.GetFocus() != e.Editor {
-				return event
-			}
-			// Coupe la ligne actuelle (Style Nano)
-			row, _, _, _ := e.Editor.GetCursor()
-			if row < 0 {
-				return nil
-			}
-
-			fullText := e.Editor.GetText()
-			lines := strings.Split(fullText, "\n")
-
-			if len(lines) == 0 || row >= len(lines) {
-				return nil
-			}
-
-			lineContent := lines[row]
-			clipboard.WriteAll(lineContent)
-
-			// Ajustement à 3 arguments comme demandé par le compilateur
-			// Note: La suppression de ligne dépend de l'implémentation de votre version
-			e.Editor.Replace(row, 0, "")
-			e.updateStatus("Ligne coupée !")
-			return nil
-
-		case tcell.KeyCtrlV:
-			if e.App.GetFocus() != e.Editor {
-				return event
-			}
-			// Récupération sécurisée du presse-papier
-			text, err := clipboard.ReadAll()
-			if err != nil {
-				e.updateStatus("[red]Erreur presse-papier: assurez-vous que xclip ou wl-clipboard est installé")
-				return nil
-			}
-			if text == "" {
-				return nil
-			}
-
-			row, col, _, _ := e.Editor.GetCursor()
-			// Ajustement à 3 arguments : (row, col, text)
-			e.Editor.Replace(row, col, text)
-			e.updateStatus("Texte collé !")
+			e.updateStatus("[blue]Recherche dans l'exploreur... (Bientôt disponible)")
 			return nil
 		}
 		return event
 	})
+
+	// 3. Raccourcis spécifiques à l'Éditeur (TextArea)
+	e.Editor.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyCtrlX:
+			e.App.SetFocus(e.FileList)
+			return nil
+		case tcell.KeyCtrlS:
+			e.saveFile()
+			return nil
+		case tcell.KeyCtrlF:
+			e.updateStatus("[blue]Recherche dans le texte... (Bientôt disponible)")
+			return nil
+		case tcell.KeyCtrlC:
+			row, _, _, _ := e.Editor.GetCursor()
+			lines := strings.Split(e.Editor.GetText(), "\n")
+			if row >= 0 && row < len(lines) {
+				if err := clipboard.WriteAll(lines[row]); err != nil {
+					e.updateStatus(fmt.Sprintf("[red]Erreur Clipboard: %v", err))
+				} else {
+					e.updateStatusTemp("Ligne copiée !")
+				}
+			}
+			return nil
+		case tcell.KeyCtrlK:
+			row, _, _, _ := e.Editor.GetCursor()
+			fullText := e.Editor.GetText()
+			lines := strings.Split(fullText, "\n")
+			if row < 0 || row >= len(lines) {
+				return nil
+			}
+			clipboard.WriteAll(lines[row])
+			newLines := make([]string, 0, len(lines)-1)
+			newLines = append(newLines, lines[:row]...)
+			newLines = append(newLines, lines[row+1:]...)
+			e.Editor.SetText(strings.Join(newLines, "\n"), true)
+			e.updateStatusTemp("Ligne coupée !")
+			return nil
+		case tcell.KeyCtrlU, tcell.KeyCtrlV:
+			text, err := clipboard.ReadAll()
+			if err != nil {
+				e.updateStatus(fmt.Sprintf("[red]Erreur Presse-papier: %v", err))
+				return nil
+			}
+			if text != "" {
+				text = strings.ReplaceAll(text, "\r", "")
+				row, col, _, _ := e.Editor.GetCursor()
+				e.Editor.Replace(row, col, text)
+				msg := "Texte collé !"
+				if event.Key() == tcell.KeyCtrlU {
+					msg = "Ligne collée (Ctrl+U) !"
+				}
+				e.updateStatusTemp(msg)
+			}
+			return nil
+		}
+		return event
+	})
+}
+
+// copyLineFromEditor extrait la ligne actuelle et l'envoie au presse-papier
+func (e *EditorApp) copyLineFromEditor() {
+	row, _, _, _ := e.Editor.GetCursor()
+	lines := strings.Split(e.Editor.GetText(), "\n")
+	if row >= 0 && row < len(lines) {
+		if err := clipboard.WriteAll(lines[row]); err != nil {
+			e.updateStatus(fmt.Sprintf("[red]Erreur Clipboard: %v", err))
+		} else {
+			e.updateStatusTemp("Ligne copiée !")
+		}
+	}
 }
 
 func (e *EditorApp) handleFileSelection(index int) {

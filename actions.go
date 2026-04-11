@@ -25,7 +25,7 @@ func (e *EditorApp) openFile(path string) {
 
 	e.FilePath = path
 	e.Editor.SetText(buf.String(), true)
-	e.updateStatus(fmt.Sprintf("Ouvert: %s", filepath.Base(path)))
+	e.Editor.SetTitle(fmt.Sprintf(" Éditeur: %s ", filepath.Base(path)))
 }
 
 func (e *EditorApp) saveFile() {
