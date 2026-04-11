@@ -2,6 +2,7 @@ package main
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell/v2"
@@ -42,15 +43,29 @@ func (e *EditorApp) setupHandlers() {
 			clipboard.WriteAll(e.Editor.GetText())
 			e.updateStatus("Texte copié !")
 			return nil
+
 		case tcell.KeyCtrlK:
-			// Logique de coupe (Kill line)
-			clipboard.WriteAll(e.Editor.GetText())
-			e.Editor.SetText("", true) // Simulation de coupe du contenu
-			e.updateStatus("Texte coupé (Ctrl+K) !")
+			// Coupe la ligne actuelle (Style Nano)
+			row, col := e.Editor.GetCursor()
+			fullText := e.Editor.GetText()
+			lines := strings.Split(fullText, "\n")
+
+			if row < len(lines) {
+				lineContent := lines[row]
+				clipboard.WriteAll(lineContent)
+				// On remplace la ligne (et le caractère newline) par rien
+				e.Editor.Replace(row, 0, row+1, 0, "")
+				e.Editor.SetCursor(row, col)
+				e.updateStatus("Ligne coupée !")
+			}
 			return nil
+
 		case tcell.KeyCtrlV:
+			// Insère le texte à la position du curseur
 			text, _ := clipboard.ReadAll()
-			e.Editor.SetText(e.Editor.GetText()+text, true)
+			row, col := e.Editor.GetCursor()
+			// Replace avec les mêmes coordonnées de début et de fin = Insertion
+			e.Editor.Replace(row, col, row, col, text)
 			e.updateStatus("Texte collé !")
 			return nil
 		}
