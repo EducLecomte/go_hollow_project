@@ -21,12 +21,9 @@ func (e *EditorApp) setupHandlers() {
 			e.App.Stop()
 			return nil
 		case tcell.KeyCtrlC:
-			// Si l'éditeur n'a pas le focus, on consomme l'événement (nil) pour éviter
-			// que le terminal n'intercepte le signal SIGINT et ne ferme l'application.
-			// Si l'éditeur a le focus, on laisse l'événement passer pour qu'il soit géré par l'éditeur.
-			if e.App.GetFocus() != e.Editor {
-				return nil
-			}
+			// Intercepte Ctrl+C pour éviter de quitter l'application
+			// (Comportement de sécurité pour éviter le SIGINT du terminal)
+			return nil
 		}
 		return event
 	})
@@ -43,9 +40,6 @@ func (e *EditorApp) setupHandlers() {
 		case tcell.KeyCtrlS:
 			e.saveFile()
 			return nil
-		case tcell.KeyCtrlF:
-			e.updateStatus("[blue]Recherche dans l'exploreur... (Bientôt disponible)")
-			return nil
 		}
 		return event
 	})
@@ -59,67 +53,73 @@ func (e *EditorApp) setupHandlers() {
 		case tcell.KeyCtrlS:
 			e.saveFile()
 			return nil
-		case tcell.KeyCtrlF:
-			e.updateStatus("[blue]Recherche dans le texte... (Bientôt disponible)")
-			return nil
-		case tcell.KeyCtrlC:
-			row, _, _, _ := e.Editor.GetCursor()
-			lines := strings.Split(e.Editor.GetText(), "\n")
-			if row >= 0 && row < len(lines) {
-				if err := clipboard.WriteAll(lines[row]); err != nil {
-					e.updateStatus(fmt.Sprintf("[red]Erreur Clipboard: %v", err))
-				} else {
-					e.updateStatusTemp("Ligne copiée !")
-				}
-			}
-			return nil
 		case tcell.KeyCtrlK:
-			row, _, _, _ := e.Editor.GetCursor()
-			fullText := e.Editor.GetText()
-			lines := strings.Split(fullText, "\n")
-			if row < 0 || row >= len(lines) {
-				return nil
-			}
-			clipboard.WriteAll(lines[row])
-			newLines := make([]string, 0, len(lines)-1)
-			newLines = append(newLines, lines[:row]...)
-			newLines = append(newLines, lines[row+1:]...)
-			e.Editor.SetText(strings.Join(newLines, "\n"), true)
-			e.updateStatusTemp("Ligne coupée !")
+			e.cutLine()
 			return nil
 		case tcell.KeyCtrlU, tcell.KeyCtrlV:
-			text, err := clipboard.ReadAll()
-			if err != nil {
-				e.updateStatus(fmt.Sprintf("[red]Erreur Presse-papier: %v", err))
-				return nil
-			}
-			if text != "" {
-				text = strings.ReplaceAll(text, "\r", "")
-				row, col, _, _ := e.Editor.GetCursor()
-				e.Editor.Replace(row, col, text)
-				msg := "Texte collé !"
-				if event.Key() == tcell.KeyCtrlU {
-					msg = "Ligne collée (Ctrl+U) !"
-				}
-				e.updateStatusTemp(msg)
-			}
+			e.pasteText()
 			return nil
 		}
 		return event
 	})
 }
 
-// copyLineFromEditor extrait la ligne actuelle et l'envoie au presse-papier
-func (e *EditorApp) copyLineFromEditor() {
+func (e *EditorApp) cutLine() {
 	row, _, _, _ := e.Editor.GetCursor()
-	lines := strings.Split(e.Editor.GetText(), "\n")
+	text := e.Editor.GetText()
+	lines := strings.Split(text, "\n")
+
 	if row >= 0 && row < len(lines) {
-		if err := clipboard.WriteAll(lines[row]); err != nil {
-			e.updateStatus(fmt.Sprintf("[red]Erreur Clipboard: %v", err))
-		} else {
-			e.updateStatusTemp("Ligne copiée !")
+		// Nano cut : on prend la ligne et on ajoute un retour à la ligne
+		lineContent := lines[row]
+		clipboard.WriteAll(lineContent + "\n")
+
+		// Supprimer la ligne du tableau
+		lines = append(lines[:row], lines[row+1:]...)
+
+		// Si le fichier devient vide, on laisse une ligne vide
+		if len(lines) == 0 {
+			lines = []string{""}
 		}
+
+		e.Editor.SetText(strings.Join(lines, "\n"), true)
+		e.updateStatusTemp("Ligne coupée (Ctrl+K)")
 	}
+}
+
+func (e *EditorApp) pasteText() {
+	text, err := clipboard.ReadAll()
+	if err != nil {
+		e.updateStatus(fmt.Sprintf("[red]Erreur Presse-papier: %v", err))
+		return
+	}
+	if text == "" {
+		return
+	}
+
+	text = strings.ReplaceAll(text, "\r", "")
+
+	// Conversion 2D (row, col) -> 1D (index global) pour Replace
+	row, col, _, _ := e.Editor.GetCursor()
+	textInEditor := e.Editor.GetText()
+	lines := strings.Split(textInEditor, "\n")
+
+	pos := 0
+	for i := 0; i < row && i < len(lines); i++ {
+		pos += len(lines[i]) + 1 // +1 pour le \n
+	}
+
+	if row < len(lines) {
+		if col > len(lines[row]) {
+			col = len(lines[row])
+		}
+		pos += col
+	} else {
+		pos = len(textInEditor)
+	}
+
+	e.Editor.Replace(pos, 0, text)
+	e.updateStatusTemp("Collé (Ctrl+U/V)")
 }
 
 func (e *EditorApp) handleFileSelection(index int) {

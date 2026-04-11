@@ -23,8 +23,11 @@ func (e *EditorApp) openFile(path string) {
 		return
 	}
 
+	// Normalisation des fins de ligne (CRLF -> LF) pour éviter les bugs de curseur
+	content := strings.ReplaceAll(buf.String(), "\r", "")
+
 	e.FilePath = path
-	e.Editor.SetText(buf.String(), true)
+	e.Editor.SetText(content, true)
 	e.Editor.SetTitle(fmt.Sprintf(" Éditeur: %s ", filepath.Base(path)))
 }
 
