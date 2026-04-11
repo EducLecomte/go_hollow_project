@@ -17,8 +17,8 @@ const (
  Ctrl + F    : Créer un nouveau fichier (depuis l'explorateur)
  Ctrl + D    : Créer un nouveau dossier (depuis l'explorateur)
  Ctrl + R    : Supprimer un fichier/dossier (depuis l'explorateur)
- Ctrl + K    : Copier un fichier (depuis l'explorateur)
- Ctrl + U    : Coller un fichier (depuis l'explorateur)
+ Ctrl + K    : Copier un fichier/dossier (depuis l'explorateur)
+ Ctrl + U    : Coller un fichier/dossier (depuis l'explorateur)
  Ctrl + X    : Revenir à l'explorateur (depuis l'éditeur)
  Entrée      : Ouvrir un fichier / Entrer dans un dossier
 

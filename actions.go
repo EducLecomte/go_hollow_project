@@ -76,12 +76,12 @@ func (e *EditorApp) createDir(name string) {
 
 func (e *EditorApp) prepareCopyFile(path string) {
 	e.CopiedPath = path
-	e.updateStatusTemp(fmt.Sprintf("Fichier prêt à copier: %s", filepath.Base(path)))
+	e.updateStatusTemp(fmt.Sprintf("Élément prêt à copier: %s", filepath.Base(path)))
 }
 
 func (e *EditorApp) pasteFile() {
 	if e.CopiedPath == "" {
-		e.updateStatus("[red]Rien à coller")
+		e.updateStatusTemp("[red]Rien à coller")
 		return
 	}
 
@@ -97,12 +97,12 @@ func (e *EditorApp) pasteFile() {
 
 	err := e.FileSystem.Copy(e.CopiedPath, dst)
 	if err != nil {
-		e.updateStatus(fmt.Sprintf("[red]Erreur collage: %v", err))
+		e.updateStatusTemp(fmt.Sprintf("[red]Erreur collage: %v", err))
 		return
 	}
 
 	e.refreshFileList()
-	e.updateStatus(fmt.Sprintf("[green]Fichier collé: %s", filepath.Base(dst)))
+	e.updateStatusTemp(fmt.Sprintf("[green]Élément collé: %s", filepath.Base(dst)))
 }
 
 func (e *EditorApp) deleteElement(path string) {

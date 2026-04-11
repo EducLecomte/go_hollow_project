@@ -79,12 +79,11 @@ func (e *EditorApp) setupUI() {
 			return
 		}
 		file := e.CurrentFiles[index-1]
-		modTime := file.ModTime.Format("2006-01-02 15:04")
 
 		if file.IsDir {
-			e.FileSizeBox.SetText(fmt.Sprintf("[yellow]Dossier\n[blue]Modifié: [white]%s", modTime))
+			e.FileSizeBox.SetText(fmt.Sprintf("[yellow]Type: [white]Dossier\n[blue]Droits: [white]%s\n[blue]Owner: [white]%s", file.Permissions, file.Owner))
 		} else {
-			e.FileSizeBox.SetText(fmt.Sprintf("[blue]Taille: [white]%s\n[blue]Modifié: [white]%s", formatSize(file.Size), modTime))
+			e.FileSizeBox.SetText(fmt.Sprintf("[blue]Taille: [white]%s\n[blue]Droits: [white]%s\n[blue]Owner: [white]%s", formatSize(file.Size), file.Permissions, file.Owner))
 		}
 	})
 
@@ -104,7 +103,7 @@ func (e *EditorApp) setupUI() {
 	// Layout de la colonne de gauche (Explorateur + Info taille)
 	leftColumn := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(e.FileList, 0, 1, true).
-		AddItem(e.FileSizeBox, 4, 0, false)
+		AddItem(e.FileSizeBox, 6, 0, false)
 
 	// Layout
 	mainFlex := tview.NewFlex().SetDirection(tview.FlexRow).
@@ -131,12 +130,16 @@ func (e *EditorApp) refreshFileList() {
 	e.PathBar.SetText(fmt.Sprintf(" [yellow]Path: [white]%s", e.CurrentDir))
 	e.CurrentFiles = files
 	for _, f := range files {
-		suffix := ""
+		var displayName string
+		modTimeStr := f.ModTime.Format("2006-01-02 15:04")
 		if f.IsDir {
-			suffix = "/"
+			// Dossier avec sa date de modification
+			displayName = fmt.Sprintf("[yellow]%-25s [blue]%s", f.Name+"/", modTimeStr)
+		} else {
+			// Fichier avec sa date de modification
+			displayName = fmt.Sprintf("[white]%-25s [green]%s", f.Name, modTimeStr)
 		}
-		// On n'affiche plus que le nom, le poids est dans l'encart du bas
-		e.FileList.AddItem(f.Name+suffix, "", 0, nil)
+		e.FileList.AddItem(displayName, "", 0, nil)
 	}
 }
 func (e *EditorApp) updateStatus(msg string) {

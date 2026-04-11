@@ -1,17 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"os/user"
+	"path/filepath"
+	"syscall"
 	"time"
 )
 
 // FileInfo représente un fichier ou dossier de manière universelle (Local, FTP, Zip)
 type FileInfo struct {
-	Name    string
-	IsDir   bool
-	Size    int64
-	ModTime time.Time
+	Name        string
+	IsDir       bool
+	Size        int64
+	ModTime     time.Time
+	Permissions string
+	Owner       string
 }
 
 // VFS est l'interface que devront implémenter tes différents modules
@@ -40,11 +46,23 @@ func (l *LocalFS) List(path string) ([]FileInfo, error) {
 			// Gérer l'erreur ou ignorer le fichier si les infos ne sont pas accessibles
 			continue
 		}
+
+		// Extraction des infos Unix (Propriétaire)
+		owner := "unknown"
+		if stat, ok := info.Sys().(*syscall.Stat_t); ok {
+			u, err := user.LookupId(fmt.Sprint(stat.Uid))
+			if err == nil {
+				owner = u.Username
+			}
+		}
+
 		files = append(files, FileInfo{
-			Name:    entry.Name(),
-			IsDir:   entry.IsDir(),
-			Size:    info.Size(),
-			ModTime: info.ModTime(),
+			Name:        entry.Name(),
+			IsDir:       entry.IsDir(),
+			Size:        info.Size(),
+			ModTime:     info.ModTime(),
+			Permissions: info.Mode().String(),
+			Owner:       owner,
 		})
 	}
 	return files, nil
@@ -69,6 +87,27 @@ func (l *LocalFS) Mkdir(path string) error {
 }
 
 func (l *LocalFS) Copy(src, dst string) error {
+	info, err := os.Lstat(src)
+	if err != nil {
+		return err
+	}
+
+	if info.IsDir() {
+		if err := os.MkdirAll(dst, info.Mode()); err != nil {
+			return err
+		}
+		entries, err := os.ReadDir(src)
+		if err != nil {
+			return err
+		}
+		for _, entry := range entries {
+			if err := l.Copy(filepath.Join(src, entry.Name()), filepath.Join(dst, entry.Name())); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
 	sourceFile, err := os.Open(src)
 	if err != nil {
 		return err

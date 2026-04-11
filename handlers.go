@@ -11,6 +11,16 @@ import (
 func (e *EditorApp) setupHandlers() {
 	// 1. Raccourcis Globaux (Application)
 	e.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		// Liste blanche des touches Ctrl utilisées par Hollow
+		// On inclut Tab, Enter et Backspace car certains terminaux les envoient avec le modificateur Ctrl
+		allowedCtrlKeys := map[tcell.Key]bool{
+			tcell.KeyCtrlS: true, tcell.KeyCtrlF: true, tcell.KeyCtrlD: true,
+			tcell.KeyCtrlR: true, tcell.KeyCtrlK: true, tcell.KeyCtrlU: true,
+			tcell.KeyCtrlV: true, tcell.KeyCtrlX: true,
+			tcell.KeyTab: true, tcell.KeyEnter: true,
+			tcell.KeyBackspace: true, tcell.KeyBackspace2: true,
+		}
+
 		switch event.Key() {
 		case tcell.KeyF1:
 			// Si une modale est déjà ouverte, on laisse l'événement circuler
@@ -34,6 +44,19 @@ func (e *EditorApp) setupHandlers() {
 			// Bloque le signal SIGINT pour éviter que le terminal ne ferme l'application
 			return nil
 		}
+
+		// Bloquer tout autre raccourci Ctrl+... non défini dans l'application
+		if event.Modifiers()&tcell.ModCtrl != 0 {
+			if !allowedCtrlKeys[event.Key()] {
+				return nil
+			}
+		}
+
+		// Bloquer les combinaisons Alt (souvent sources de conflits avec le terminal ou l'OS)
+		if event.Modifiers()&tcell.ModAlt != 0 {
+			return nil
+		}
+
 		return event
 	})
 

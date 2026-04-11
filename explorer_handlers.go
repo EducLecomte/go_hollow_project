@@ -29,9 +29,7 @@ func (e *EditorApp) setupExplorerHandlers() {
 			index := e.FileList.GetCurrentItem()
 			if index > 0 && index-1 < len(e.CurrentFiles) {
 				file := e.CurrentFiles[index-1]
-				if !file.IsDir {
-					e.prepareCopyFile(filepath.Join(e.CurrentDir, file.Name))
-				}
+				e.prepareCopyFile(filepath.Join(e.CurrentDir, file.Name))
 			}
 			return nil
 		case tcell.KeyCtrlU:
