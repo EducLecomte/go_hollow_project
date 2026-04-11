@@ -19,8 +19,11 @@ func (e *EditorApp) setupExplorerHandlers() {
 		case tcell.KeyCtrlS:
 			e.saveFile()
 			return nil
-		case tcell.KeyCtrlN:
+		case tcell.KeyCtrlF:
 			e.showNewFileDialog()
+			return nil
+		case tcell.KeyCtrlD:
+			e.showNewDirDialog()
 			return nil
 		}
 		return event

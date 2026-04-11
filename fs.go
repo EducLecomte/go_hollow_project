@@ -19,6 +19,7 @@ type VFS interface {
 	List(path string) ([]FileInfo, error)
 	Read(path string) (io.ReadCloser, error)
 	Write(path string, data io.Reader) error
+	Mkdir(path string) error
 }
 
 // LocalFS implémente VFS pour le système de fichiers local
@@ -59,4 +60,8 @@ func (l *LocalFS) Write(path string, data io.Reader) error {
 	defer f.Close()
 	_, err = io.Copy(f, data)
 	return err
+}
+
+func (l *LocalFS) Mkdir(path string) error {
+	return os.Mkdir(path, 0755)
 }

@@ -41,7 +41,8 @@ type VFS interface {
 | `TAB` | Basculer de l'explorateur vers l'éditeur |
 | `Ctrl + X` | Revenir à la liste (depuis l'éditeur) / Quitter (depuis la liste) |
 | `F10` | Quitter l'application |
-| `Ctrl + N` | Créer un nouveau fichier |
+| `Ctrl + F` | Créer un nouveau fichier |
+| `Ctrl + D` | Créer un nouveau dossier |
 | `Ctrl + S` | Sauvegarder le fichier courant |
 | `Ctrl + K` | Couper la ligne actuelle (Style Nano) |
 | `Ctrl + U / V` | Coller le texte |

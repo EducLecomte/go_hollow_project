@@ -62,3 +62,14 @@ func (e *EditorApp) createFile(name string) {
 	e.openFile(path)
 	e.updateStatus(fmt.Sprintf("[green]Fichier créé: %s", name))
 }
+
+func (e *EditorApp) createDir(name string) {
+	path := filepath.Join(e.CurrentDir, name)
+	err := e.FileSystem.Mkdir(path)
+	if err != nil {
+		e.updateStatus(fmt.Sprintf("[red]Erreur dossier: %v", err))
+		return
+	}
+	e.refreshFileList()
+	e.updateStatus(fmt.Sprintf("[green]Dossier créé: %s", name))
+}

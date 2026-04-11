@@ -104,3 +104,39 @@ func (e *EditorApp) showNewFileDialog() {
 		}
 	})
 }
+
+// showNewDirDialog affiche un champ de saisie pour créer un nouveau dossier
+func (e *EditorApp) showNewDirDialog() {
+	inputField := tview.NewInputField().
+		SetLabel(" Nom du nouveau dossier: ").
+		SetFieldWidth(30)
+
+	inputField.SetBorder(true).
+		SetTitle(" Nouveau Dossier ").
+		SetTitleAlign(tview.AlignCenter)
+
+	modal := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(inputField, 3, 1, true).
+			AddItem(nil, 0, 1, false), 40, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	e.Pages.AddPage("newdir", modal, true, true)
+	e.App.SetFocus(inputField)
+
+	inputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			name := inputField.GetText()
+			if name != "" {
+				e.createDir(name)
+			}
+			e.Pages.RemovePage("newdir")
+			e.App.SetFocus(e.FileList)
+		} else if key == tcell.KeyEsc {
+			e.Pages.RemovePage("newdir")
+			e.App.SetFocus(e.FileList)
+		}
+	})
+}
