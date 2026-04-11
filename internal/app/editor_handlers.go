@@ -10,6 +10,14 @@ import (
 
 // setupEditorHandlers gère les entrées clavier pour la zone d'édition
 func (e *EditorApp) setupEditorHandlers() {
+	// Réinitialise le curseur et l'affichage en haut de page lors de la prise de focus
+	// Cela couvre le passage par "Tab" et la sélection depuis l'explorateur.
+	e.Editor.SetFocusFunc(func() {
+		// SetText avec keepCursor=false force le curseur à (0,0)
+		// et assure que le haut du fichier est visible.
+		e.Editor.SetText(e.Editor.GetText(), false)
+	})
+
 	e.Editor.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyCtrlX:
@@ -31,27 +39,33 @@ func (e *EditorApp) setupEditorHandlers() {
 
 // cutLine : Supprime la ligne et la met dans le presse-papier
 func (e *EditorApp) cutLine() {
+	// GetCursor renvoie 4 valeurs : row, col, width, height
 	row, _, _, _ := e.Editor.GetCursor()
-	text := e.Editor.GetText()
-	lines := strings.Split(text, "\n")
+	lines := strings.Split(e.Editor.GetText(), "\n")
 
-	if row >= 0 && row < len(lines) {
-		content := lines[row]
-		clipboard.WriteAll(content)
-
-		// Suppression de la ligne
-		var newLines []string
-		for i, l := range lines {
-			if i != row {
-				newLines = append(newLines, l)
-			}
-		}
-		if len(newLines) == 0 {
-			newLines = []string{""}
-		}
-		e.Editor.SetText(strings.Join(newLines, "\n"), true)
-		e.updateStatusTemp("Ligne coupée !")
+	if row < 0 || row >= len(lines) {
+		return
 	}
+
+	lineText := lines[row]
+	// On ajoute un retour à la ligne pour forcer l'insertion de ligne lors du collage
+	clipboard.WriteAll(lineText + "\n")
+
+	// Calcul de la position 1D du début de la ligne (colonne 0)
+	pos := 0
+	for i := 0; i < row; i++ {
+		pos += len(lines[i]) + 1
+	}
+
+	// Longueur à supprimer : le texte de la ligne plus le séparateur
+	fullText := e.Editor.GetText()
+	count := len(lineText) + 1
+	if pos+count > len(fullText) {
+		count = len(fullText) - pos
+	}
+
+	e.Editor.Replace(pos, count, "")
+	e.updateStatusTemp("Ligne coupée")
 }
 
 // pasteText : Colle le texte à la position exacte du curseur
@@ -64,33 +78,30 @@ func (e *EditorApp) pasteText(isUncut bool) {
 	if text == "" {
 		return
 	}
-
 	text = strings.ReplaceAll(text, "\r", "")
 
-	// Conversion des coordonnées 2D en index 1D pour coller au bon endroit
-	row, col, _, _ := e.Editor.GetCursor()
-	content := e.Editor.GetText()
-	lines := strings.Split(content, "\n")
+	// Pour que la ligne actuelle "descende", on colle systématiquement au début de la ligne
+	// On s'assure d'ignorer les 4 valeurs de retour pour éviter l'erreur de compilation
+	row, _, _, _ := e.Editor.GetCursor()
+	lines := strings.Split(e.Editor.GetText(), "\n")
 
 	pos := 0
-	for i := 0; i < row && i < len(lines); i++ {
-		pos += len(lines[i]) + 1
+	for i := 0; i < row; i++ {
+		if i < len(lines) {
+			pos += len(lines[i]) + 1
+		}
 	}
 
-	if row < len(lines) {
-		if col > len(lines[row]) {
-			col = len(lines[row])
-		}
-		pos += col
-	} else {
-		pos = len(content)
+	// On s'assure que le texte se termine par un saut de ligne pour l'effet d'insertion
+	if !strings.HasSuffix(text, "\n") {
+		text += "\n"
 	}
 
 	e.Editor.Replace(pos, 0, text)
 
 	msg := "Texte collé !"
 	if isUncut {
-		msg = "Ligne collée (Ctrl+U) !"
+		msg = "Ligne rétablie (Ctrl+U) !"
 	}
 	e.updateStatusTemp(msg)
 }
