@@ -75,7 +75,8 @@ func NewEditorApp() *EditorApp {
 func (e *EditorApp) setupUI() {
 	e.PathBar.SetDynamicColors(true).
 		SetTextAlign(tview.AlignLeft).
-		SetBackgroundColor(tcell.ColorDarkGreen)
+		SetTextColor(tcell.ColorBlack).
+		SetBackgroundColor(tcell.ColorGreen)
 
 	e.FileList.SetBorder(true).SetTitle(" Exploreur ").SetBorderColor(tcell.ColorYellow)
 	e.FileList.ShowSecondaryText(false)

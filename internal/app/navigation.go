@@ -25,7 +25,7 @@ func (e *EditorApp) refreshFileList() {
 		return
 	}
 
-	e.PathBar.SetText(fmt.Sprintf(" [yellow]Path: [white]%s", e.CurrentDir))
+	e.PathBar.SetText(fmt.Sprintf(" Path: %s", e.CurrentDir))
 	e.CurrentFiles = files
 	for _, f := range files {
 		var displayName string
@@ -57,7 +57,7 @@ func (e *EditorApp) handleFileSelection(index int) {
 
 		e.CurrentDir = filepath.Dir(e.CurrentDir)
 		e.refreshFileList()
-		
+
 		// Mise à jour de la barre d'état selon le contexte
 		if _, ok := e.FileSystem.(*vfs.ArchiveFS); ok {
 			e.updateStatus(utils.HelpMsgArchive)
