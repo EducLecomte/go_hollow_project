@@ -2,89 +2,62 @@
 
 ![Banner](banner.png)
 
-**Hollow** est un éditeur de texte TUI (Terminal User Interface) moderne écrit en Go. Il fusionne la simplicité d'utilisation de **Nano** avec la puissance de navigation et de gestion de fichiers distants de **mcedit** (Midnight Commander).
+**Hollow** est un éditeur de texte TUI (Terminal User Interface) moderne et ultra-fluide écrit en Go. Il fusionne la simplicité d'utilisation de **Nano** avec la puissance de navigation et de gestion de fichiers distants inspirée de **mcedit** (Midnight Commander).
 
 Ce projet est développé avec une IA, dans un but récréatif et éducatif.
 
+## Fonctionnalités Clés
 
-## Fonctionnalités
-
-- **Explorateur de fichiers intégré** : Navigation fluide dans l'arborescence locale.
-- **Prévisualisation intelligente** : Coloration syntaxique pour les fichiers (via Chroma) et vue arborescente pour les dossiers.
-- **Éditeur de texte avancé** : Mode plein écran avec numérotation des lignes, indicateur d'état (`*`), et gestion des fins de ligne.
-- **Manipulation de lignes (Nano-style)** : Raccourcis `Ctrl+K` et `Ctrl+U` pour couper et coller des lignes entières.
-- **Recherche intégrée** : `Ctrl+F` pour rechercher rapidement des termes dans l'éditeur avec centrage automatique sur le résultat.
-- **Système de Fichiers Virtuel (VFS)** : Support natif du système local et des archives (Lecture seule).
-- **Aide contextuelle** : Barre de raccourcis dynamique et documentation interactive via `F1`.
-- **Sauvegarde non-interruptive** : `Ctrl+S` enregistre votre travail sans fermer l'éditeur.
-- **Intégration Shell** : Script d'installation permettant de synchroniser le répertoire de travail du terminal avec celui de l'éditeur à la fermeture.
+- **Explorateur de fichiers multi-protocoles** : Navigation fluide dans l'arborescence locale et distante (FTP).
+- **Architecture Asynchrone** : Chargement des fichiers et prévisualisations en arrière-plan avec système d'annulation intelligent. L'interface ne "gèle" jamais, même sur des connexions lentes.
+- **Client FTP Intégré** : Connectez-vous à des serveurs distants via `F10` et éditez vos fichiers comme s'ils étaient sur votre disque.
+- **Sécurité et Robustesse** : Détection automatique des fichiers binaires (images, exécutables) avec avertissements pour éviter les affichages illisibles ou les plantages.
+- **Explorateur d'archives** : Navigation transparente et extraction à la volée du contenu des fichiers `.zip`, `.tar` et `.tar.gz`.
+- **Prévisualisation intelligente** : Coloration syntaxique temps réel (via Chroma) et vue arborescente pour les dossiers.
+- **Éditeur de texte riche** : Mode plein écran, numérotation des lignes, recherche textuelle (`Ctrl+F`), et gestion des fins de ligne.
+- **Aide Contextuelle Dynamique** : Appuyez sur `F1` à tout moment pour voir les raccourcis spécifiques au mode actuel (Explorateur, Archive ou Éditeur).
 
 ## Architecture Technique
 
-Le projet est construit de manière modulaire :
-
-- `main.go` : Point d'entrée, initialise l'application.
-- `internal/app/` : Cœur de l'application (UI, Handlers, Actions).
-- `internal/vfs/` : Abstraction et implémentations du système de fichiers (VFS).
-- `internal/utils/` : Constantes d'aide et formatage utilitaire.
-
-### Le coeur : L'interface VFS
-
-L'extensibilité du projet repose sur l'interface `VFS`, permettant d'ajouter des protocoles sans modifier l'UI :
-
-```go
-type VFS interface {
-    List(path string) ([]FileInfo, error)
-    Read(path string) (io.ReadCloser, error)
-    Write(path string, data io.Reader) error
-}
-```
+Le projet repose sur une abstraction puissante du système de fichiers (**VFS**) située dans `internal/vfs/`, permettant d'ajouter facilement de nouveaux protocoles (SFTP, S3, etc.) sans toucher à la logique de l'interface utilisateur.
 
 ## Raccourcis Clavier
 
+### Navigation (Explorateur / Visualiseur)
 | Touche | Action |
 | :--- | :--- |
-| `F1` | Afficher l'aide interactive |
-| `TAB` | Basculer entre l'explorateur et le visualiseur |
-| `Ctrl + X` | Quitter l'application (depuis la liste) |
+| `F1` | Aide contextuelle (Explorateur/Archive) |
+| `F10` | Ouvrir le dialogue de connexion FTP |
+| `TAB` / `Ctrl + X` | Basculer focus entre l'Explorateur et le Visualiseur |
+| `Entrée` | Ouvrir un fichier ou entrer dans un dossier / archive |
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |
-| `Ctrl + R` | Supprimer le fichier ou dossier sélectionné |
-| `Ctrl + E` | Extraire l'archive sélectionnée |
-| `Ctrl + K` | Copier le fichier (Explorateur) / Couper la ligne (Éditeur) |
-| `Ctrl + U` | Coller le fichier (Explorateur) / Coller le bloc (Éditeur) |
-| `Ctrl + S` | Sauvegarder le fichier (Éditeur) |
-| `Entrée` | Ouvrir un fichier ou entrer dans un dossier |
-| `Echap` | Fermer un dialogue ou quitter l'éditeur |
+| `Suppr` | Supprimer l'élément sélectionné |
+| `Ctrl + E` | Extraire une archive (ou un fichier d'une archive) |
+| `Ctrl + K` / `Ctrl + U` | Copier / Coller un élément |
+| `Ctrl + X` | Quitter Hollow (quand l'Explorateur a le focus) |
+
+### Édition (Éditeur Plein Écran)
+| Touche | Action |
+| :--- | :--- |
+| `F1` | Aide contextuelle (Édition) |
+| `Ctrl + S` | Sauvegarder les modifications |
+| `Ctrl + F` | Rechercher dans le texte (Suivant avec Entrée) |
+| `Ctrl + K` | Couper la ligne actuelle (Nano-style, concatène si répété) |
+| `Ctrl + U` | Coller le bloc de lignes coupé |
+| `Esc` / `Ctrl + X` | Fermer l'éditeur (confirmation si non sauvegardé) |
 
 ## Installation & Utilisation
 
 ### Prérequis
-
 - Go 1.18+
 
 ### Installation rapide
-
-Utilisez le script d'installation fourni pour compiler le projet et configurer votre shell :
+Utilisez le script d'installation fourni pour compiler le projet et configurer la synchronisation du shell :
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-## État du Projet
-
-### Implémenté
-- Navigation locale et exploration d'archives (.zip, .tar, .tar.gz).
-- Extraction d'archives avec retour visuel (Ctrl+E).
-- Lecture et écriture réelle sur le disque.
-- Indicateur visuel de modification dans l'éditeur.
-- Mécanique de "Cut & Paste" de blocs de lignes sans perte du curseur (Ctrl+K / Ctrl+U).
-- Explorateur d'archives: Navigation transparente dans les fichiers `.zip`, `.tar` et `.tar.gz`.
-- Recherche textuelle dans l'éditeur (Ctrl+F).
-- Numérotation dynamique des lignes.
-
-### En cours / À venir
-- [ ] **Client FTP** : Implémentation de `FTPFS` pour l'édition distante.
-
 ---
-*Dernière mise à jour : Dimanche 12 Avril 2026 - 12:45*
+*Dernière mise à jour majeure : Dimanche 12 Avril 2026 - 17:35*
