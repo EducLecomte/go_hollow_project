@@ -6,16 +6,24 @@
 
 Ce projet est développé avec une IA, dans un but récréatif et éducatif.
 
+## Aperçu
+
+![Explorateur](screenshot-explorer.png)
+*L'explorateur de fichiers avec prévisualisation intelligente et navigation asynchrone.*
+
 ## Fonctionnalités Clés
 
 - **Explorateur de fichiers multi-protocoles** : Navigation fluide dans l'arborescence locale et distante (FTP).
 - **Architecture Asynchrone** : Chargement des fichiers et prévisualisations en arrière-plan avec système d'annulation intelligent. L'interface ne "gèle" jamais, même sur des connexions lentes.
 - **Client FTP Intégré** : Connectez-vous à des serveurs distants via `F10` et éditez vos fichiers comme s'ils étaient sur votre disque.
+  !FTP
 - **Sécurité et Robustesse** : Détection automatique des fichiers binaires (images, exécutables) avec avertissements pour éviter les affichages illisibles ou les plantages.
 - **Explorateur d'archives** : Navigation transparente et extraction à la volée du contenu des fichiers `.zip`, `.tar` et `.tar.gz`.
 - **Prévisualisation intelligente** : Coloration syntaxique temps réel (via Chroma) et vue arborescente pour les dossiers.
 - **Éditeur de texte riche** : Mode plein écran, numérotation des lignes, recherche textuelle (`Ctrl+F`), et gestion des fins de ligne.
+  !Éditeur
 - **Aide Contextuelle Dynamique** : Appuyez sur `F1` à tout moment pour voir les raccourcis spécifiques au mode actuel (Explorateur, Archive ou Éditeur).
+  !Aide
 
 ## Architecture Technique
 
