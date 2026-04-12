@@ -114,6 +114,29 @@ func (e *EditorApp) showNewFileDialog() {
 	})
 }
 
+// showSaveConfirmation demande si l'on souhaite sauvegarder avant de quitter l'éditeur
+func (e *EditorApp) showSaveConfirmation(content string) {
+	modal := tview.NewModal().
+		SetText("Voulez-vous sauvegarder les modifications avant de quitter ?").
+		AddButtons([]string{"Sauvegarder", "Ignorer", "Annuler"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			switch buttonLabel {
+			case "Sauvegarder":
+				e.saveFromFullEditor(content)
+				e.Pages.RemovePage("edit_screen")
+				e.App.SetFocus(e.FileList)
+			case "Ignorer":
+				e.Pages.RemovePage("edit_screen")
+				e.App.SetFocus(e.FileList)
+			case "Annuler":
+				// On ferme juste la modale, le focus revient à l'éditeur
+			}
+			e.Pages.RemovePage("save_confirm")
+		})
+
+	e.Pages.AddPage("save_confirm", modal, true, true)
+}
+
 // showNewDirDialog affiche le formulaire de création de dossier
 func (e *EditorApp) showNewDirDialog() {
 	inputField := tview.NewInputField().SetLabel(" Nom du nouveau dossier: ")

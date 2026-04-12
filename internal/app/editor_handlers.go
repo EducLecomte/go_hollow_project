@@ -11,13 +11,14 @@ import (
 
 // showFullEditor affiche l'interface d'édition plein écran
 func (e *EditorApp) showFullEditor(content string) {
+	initialContent := content
 	textArea := tview.NewTextArea().SetText(content, false)
 	textArea.SetBorder(true).SetTitle(fmt.Sprintf(" Édition: %s ", filepath.Base(e.FilePath)))
 
 	// Instructions en bas de l'éditeur
 	footer := tview.NewTextView().
 		SetDynamicColors(true).
-		SetText(" [yellow]Ctrl+S:[white] Sauver | [yellow]Esc:[white] Annuler")
+		SetText(" [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+X:[white] Quitter")
 
 	layout := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(textArea, 0, 1, true).
@@ -27,9 +28,13 @@ func (e *EditorApp) showFullEditor(content string) {
 	e.App.SetFocus(textArea)
 
 	textArea.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyEsc {
-			e.Pages.RemovePage("edit_screen")
-			e.App.SetFocus(e.FileList)
+		if event.Key() == tcell.KeyCtrlX || event.Key() == tcell.KeyEsc {
+			if textArea.GetText() != initialContent {
+				e.showSaveConfirmation(textArea.GetText())
+			} else {
+				e.Pages.RemovePage("edit_screen")
+				e.App.SetFocus(e.FileList)
+			}
 			return nil
 		}
 		if event.Key() == tcell.KeyCtrlS {
