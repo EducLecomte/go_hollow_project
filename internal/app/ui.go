@@ -17,7 +17,7 @@ type EditorApp struct {
 	PathBar      *tview.TextView
 	FileList     *tview.List
 	FileSizeBox  *tview.TextView
-	Editor       *tview.TextArea
+	Viewer       *tview.TextArea
 	Status       *tview.TextView
 	Pages        *tview.Pages
 	FilePath     string
@@ -40,7 +40,7 @@ func NewEditorApp() *EditorApp {
 		PathBar:     tview.NewTextView(),
 		FileList:    tview.NewList(),
 		FileSizeBox: tview.NewTextView(),
-		Editor:      tview.NewTextArea(),
+		Viewer:      tview.NewTextArea(),
 		Status:      tview.NewTextView(),
 		Pages:       tview.NewPages(),
 		CurrentDir:  wd,
@@ -84,26 +84,23 @@ func (e *EditorApp) setupUI() {
 			return
 		}
 		file := e.CurrentFiles[index-1]
-
 		if file.IsDir {
 			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Droits: [white]%s\n[green]Owner: [white]%s", file.Permissions, file.Owner))
+			e.Viewer.SetText("", false)
+			e.Viewer.SetTitle(" Visualiseur ")
 		} else {
 			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), file.Permissions, file.Owner))
+			e.previewFile(filepath.Join(e.CurrentDir, file.Name))
 		}
 	})
 
-	e.Editor.SetBorder(true).SetTitle(" Éditeur ").SetBorderColor(tcell.ColorWhite)
-	e.Editor.SetPlaceholder("Entrez votre texte ici... (Ctrl+S pour sauver, Ctrl+K/U pour couper/coller)")
-	e.Editor.SetFocusFunc(func() {
-		e.Editor.SetBorderColor(tcell.ColorYellow)
-		// Force le style de sélection en noir sur blanc pour l'éditeur
-		e.Editor.SetSelectedStyle(tcell.StyleDefault.
-			Background(tcell.ColorWhite).
-			Foreground(tcell.ColorBlack))
+	e.Viewer.SetBorder(true).SetTitle(" Visualiseur ").SetBorderColor(tcell.ColorWhite)
+	e.Viewer.SetFocusFunc(func() {
+		e.Viewer.SetBorderColor(tcell.ColorYellow)
 		e.updateStatus(utils.HelpMsgEdit)
 	})
-	e.Editor.SetBlurFunc(func() {
-		e.Editor.SetBorderColor(tcell.ColorWhite)
+	e.Viewer.SetBlurFunc(func() {
+		e.Viewer.SetBorderColor(tcell.ColorWhite)
 	})
 
 	e.Status.SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
@@ -119,7 +116,7 @@ func (e *EditorApp) setupUI() {
 		AddItem(e.PathBar, 1, 0, false).
 		AddItem(tview.NewFlex().
 			AddItem(leftColumn, 0, 1, true).
-			AddItem(e.Editor, 0, 2, false), 0, 1, true).
+			AddItem(e.Viewer, 0, 2, false), 0, 1, true).
 		AddItem(e.Status, 1, 0, false)
 
 	e.Pages.AddPage("main", mainFlex, true, true)
@@ -166,7 +163,7 @@ func (e *EditorApp) updateStatusTemp(msg string) {
 		// tview n'est pas thread-safe, on utilise QueueUpdateDraw pour mettre à jour l'UI
 		e.App.QueueUpdateDraw(func() {
 			// Restauration du message d'aide selon le focus actuel
-			if e.App.GetFocus() == e.Editor {
+			if e.App.GetFocus() == e.Viewer {
 				e.updateStatus(utils.HelpMsgEdit)
 			} else {
 				e.updateStatus(utils.HelpMsgFiles)

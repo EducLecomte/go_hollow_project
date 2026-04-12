@@ -41,8 +41,8 @@ type VFS interface {
 | Touche | Action |
 | :--- | :--- |
 | `F1` | Afficher l'aide interactive |
-| `TAB` | Basculer de l'explorateur vers l'éditeur |
-| `Ctrl + X` | Revenir à la liste (depuis l'éditeur) / Quitter (depuis la liste) |
+| `TAB` | Basculer entre l'explorateur et le visualiseur |
+| `Ctrl + X` | Quitter l'application (depuis la liste) |
 | `F10` | Quitter l'application |
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |

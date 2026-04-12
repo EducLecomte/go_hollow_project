@@ -11,13 +11,10 @@ func (e *EditorApp) setupExplorerHandlers() {
 	e.FileList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyTab:
-			e.App.SetFocus(e.Editor)
+			e.App.SetFocus(e.Viewer)
 			return nil
 		case tcell.KeyCtrlX:
 			e.showQuitConfirmation()
-			return nil
-		case tcell.KeyCtrlS:
-			e.saveFile()
 			return nil
 		case tcell.KeyCtrlF:
 			e.showNewFileDialog()
