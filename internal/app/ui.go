@@ -81,14 +81,14 @@ func (e *EditorApp) setupUI() {
 	e.FileList.SetChangedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
 		if index == 0 {
 			e.FileSizeBox.SetText("[gray]Parent Directory")
+			e.Viewer.SetText("").SetTitle(" Visualiseur ")
 			return
 		}
 		file := e.CurrentFiles[index-1]
 		modTimeStr := file.ModTime.Format("2006-01-02 15:04")
 		if file.IsDir {
 			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", modTimeStr, file.Permissions, file.Owner))
-			e.Viewer.SetText("")
-			e.Viewer.SetTitle(" Visualiseur ")
+			e.previewDirectory(filepath.Join(e.CurrentDir, file.Name))
 		} else {
 			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner))
 			e.previewFile(filepath.Join(e.CurrentDir, file.Name))

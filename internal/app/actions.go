@@ -15,7 +15,7 @@ import (
 func (e *EditorApp) previewFile(path string) {
 	reader, err := e.FileSystem.Read(path)
 	if err != nil {
-		e.Viewer.SetText(fmt.Sprintf("Erreur lecture: %v", err))
+		e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture: %v", err))
 		return
 	}
 	defer reader.Close()
@@ -28,7 +28,40 @@ func (e *EditorApp) previewFile(path string) {
 
 	// Application de la coloration syntaxique
 	highlighted := utils.Highlight(content, path)
+	// tview.TranslateANSI convertit les codes couleurs de chroma pour le TextView
 	e.Viewer.SetText(tview.TranslateANSI(highlighted))
+	e.Viewer.ScrollToBeginning()
+	e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
+}
+
+// previewDirectory affiche une arborescence simplifiée du contenu d'un dossier
+func (e *EditorApp) previewDirectory(path string) {
+	files, err := e.FileSystem.List(path)
+	if err != nil {
+		e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture dossier: %v", err))
+		return
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Contenu de [yellow]%s[white] :\n\n", filepath.Base(path)))
+
+	if len(files) == 0 {
+		sb.WriteString("  [gray](Dossier vide)")
+	} else {
+		for i, f := range files {
+			connector := "├── "
+			if i == len(files)-1 {
+				connector = "└── "
+			}
+			if f.IsDir {
+				sb.WriteString(fmt.Sprintf("%s[darkorange]%s/[white]\n", connector, f.Name))
+			} else {
+				sb.WriteString(fmt.Sprintf("%s%s\n", connector, f.Name))
+			}
+		}
+	}
+
+	e.Viewer.SetText(sb.String())
 	e.Viewer.ScrollToBeginning()
 	e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
 }
