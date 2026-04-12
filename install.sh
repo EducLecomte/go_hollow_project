@@ -63,7 +63,7 @@ fi
 chmod +x "$TEMP_BINARY"
 
 echo "Installation de Hollow dans $INSTALL_DIR..."
-sudo mv "$TEMP_BINARY" "$INSTALL_DIR/$BINARY_NAME"
+mv "$TEMP_BINARY" "$INSTALL_DIR/$BINARY_NAME"
 
 if [ $? -ne 0 ]; then
     echo "Erreur : Échec de l'installation. Assurez-vous d'avoir les permissions sudo."
