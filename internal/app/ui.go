@@ -84,12 +84,13 @@ func (e *EditorApp) setupUI() {
 			return
 		}
 		file := e.CurrentFiles[index-1]
+		modTimeStr := file.ModTime.Format("2006-01-02 15:04")
 		if file.IsDir {
-			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Droits: [white]%s\n[green]Owner: [white]%s", file.Permissions, file.Owner))
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", modTimeStr, file.Permissions, file.Owner))
 			e.Viewer.SetText("", false)
 			e.Viewer.SetTitle(" Visualiseur ")
 		} else {
-			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), file.Permissions, file.Owner))
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner))
 			e.previewFile(filepath.Join(e.CurrentDir, file.Name))
 		}
 	})
@@ -109,7 +110,7 @@ func (e *EditorApp) setupUI() {
 	// Layout de la colonne de gauche (Explorateur + Info taille)
 	leftColumn := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(e.FileList, 0, 1, true).
-		AddItem(e.FileSizeBox, 5, 0, false)
+		AddItem(e.FileSizeBox, 6, 0, false)
 
 	// Layout
 	mainFlex := tview.NewFlex().SetDirection(tview.FlexRow).
@@ -124,8 +125,7 @@ func (e *EditorApp) setupUI() {
 
 func (e *EditorApp) refreshFileList() {
 	e.FileList.Clear()
-	header := fmt.Sprintf("%-25s [green]Date", "..")
-	e.FileList.AddItem(header, "Retour au parent", '.', nil)
+	e.FileList.AddItem("..", "Retour au parent", '.', nil)
 
 	files, err := e.FileSystem.List(e.CurrentDir)
 	if err != nil {
@@ -138,13 +138,12 @@ func (e *EditorApp) refreshFileList() {
 	e.CurrentFiles = files
 	for _, f := range files {
 		var displayName string
-		modTimeStr := f.ModTime.Format("2006-01-02 15:04")
 		if f.IsDir {
-			// Dossier : On accole le slash au nom pour une identification immédiate, puis on aligne la colonne
-			displayName = fmt.Sprintf("[darkorange]%-25s [gray]%s", f.Name+"/", modTimeStr)
+			// Dossier : On accole le slash au nom pour une identification immédiate
+			displayName = "[darkorange]" + f.Name + "/"
 		} else {
-			// Fichier : Nom sans tag, date en gris pour l'uniformité
-			displayName = fmt.Sprintf("%-25s [gray]%s", f.Name, modTimeStr)
+			// Fichier : Nom simple
+			displayName = f.Name
 		}
 		e.FileList.AddItem(displayName, "", 0, nil)
 	}
