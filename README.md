@@ -10,12 +10,13 @@ Ce projet est développé en collaboration avec Gemini Code Assist, dans un but 
 ## Fonctionnalités
 
 - **Explorateur de fichiers intégré** : Navigation fluide dans l'arborescence locale.
-- **Éditeur de texte avec indicateur d'état** : Visualisation en temps réel des modifications non sauvegardées (symbole `*`).
+- **Prévisualisation intelligente** : Coloration syntaxique pour les fichiers (via Chroma) et vue arborescente pour les dossiers.
+- **Éditeur de texte avancé** : Mode plein écran avec indicateur d'état (`*`), support de la coloration et gestion des fins de ligne.
 - **Manipulation de lignes (Nano-style)** : Raccourcis `Ctrl+K` et `Ctrl+U` pour couper et coller des lignes entières.
 - **Système de Fichiers Virtuel (VFS)** : Architecture prête pour le support FTP et Archives.
-- **Presse-papier système** : Copier-coller intégré avec l'OS (X11/Wayland).
 - **Aide contextuelle** : Barre de raccourcis dynamique et documentation interactive via `F1`.
 - **Sauvegarde non-interruptive** : `Ctrl+S` enregistre votre travail sans fermer l'éditeur.
+- **Intégration Shell** : Script d'installation permettant de synchroniser le répertoire de travail du terminal avec celui de l'éditeur à la fermeture.
 
 ## Architecture Technique
 
@@ -45,35 +46,27 @@ type VFS interface {
 | `F1` | Afficher l'aide interactive |
 | `TAB` | Basculer entre l'explorateur et le visualiseur |
 | `Ctrl + X` | Quitter l'application (depuis la liste) |
-| `F10` | Quitter l'application |
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |
 | `Ctrl + R` | Supprimer le fichier ou dossier sélectionné |
-| `Ctrl + K` | Copier le fichier ou dossier sélectionné |
-| `Ctrl + U` | Coller l'élément dans le dossier actuel |
+| `Ctrl + K` | Copier le fichier (Explorateur) / Couper la ligne (Éditeur) |
+| `Ctrl + U` | Coller le fichier (Explorateur) / Coller le bloc (Éditeur) |
 | `Ctrl + S` | Sauvegarder le fichier (Éditeur) |
-| `Ctrl + K` | Couper la ligne entière (concatène en bloc si répété) |
-| `Ctrl + U` | Coller le bloc de texte coupé (Éditeur) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier |
+| `Echap` | Fermer un dialogue ou quitter l'éditeur |
 
 ## Installation & Utilisation
 
 ### Prérequis
 
 - Go 1.18+
-- `xclip`, `xsel` ou `wl-clipboard` (pour le support du presse-papier sur Linux)
 
-### Mise à jour des dépendances
+### Installation rapide
 
-Pour bénéficier des dernières améliorations de l'interface (comme la numérotation des lignes), assurez-vous de mettre à jour `tview` :
+Utilisez le script d'installation fourni pour compiler le projet et configurer votre shell :
 ```bash
-go get -u github.com/rivo/tview
-```
-
-### Lancement
-
-```bash
-go run .
+chmod +x install.sh
+./install.sh
 ```
 
 ## État du Projet
