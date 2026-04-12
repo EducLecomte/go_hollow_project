@@ -1,20 +1,56 @@
 package app
 
 import (
+	"fmt"
+	"path/filepath"
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
-// setupEditorHandlers gère les entrées clavier pour la zone d'édition
-func (e *EditorApp) setupEditorHandlers() {
-	e.Viewer.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyTab:
+// showFullEditor affiche l'interface d'édition plein écran
+func (e *EditorApp) showFullEditor(content string) {
+	textArea := tview.NewTextArea().SetText(content, false)
+	textArea.SetBorder(true).SetTitle(fmt.Sprintf(" Édition: %s ", filepath.Base(e.FilePath)))
+
+	// Instructions en bas de l'éditeur
+	footer := tview.NewTextView().
+		SetDynamicColors(true).
+		SetText(" [yellow]Ctrl+S:[white] Sauver | [yellow]Esc:[white] Annuler")
+
+	layout := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(textArea, 0, 1, true).
+		AddItem(footer, 1, 0, false)
+
+	e.Pages.AddPage("edit_screen", layout, true, true)
+	e.App.SetFocus(textArea)
+
+	textArea.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc {
+			e.Pages.RemovePage("edit_screen")
 			e.App.SetFocus(e.FileList)
 			return nil
 		}
-
-		// Le TextView gère nativement les flèches pour le scroll
-		// On laisse passer les touches par défaut
+		if event.Key() == tcell.KeyCtrlS {
+			e.saveFromFullEditor(textArea.GetText())
+			e.Pages.RemovePage("edit_screen")
+			e.App.SetFocus(e.FileList)
+			return nil
+		}
 		return event
 	})
+}
+
+// saveFromFullEditor gère la persistance des données depuis le mode édition
+func (e *EditorApp) saveFromFullEditor(content string) {
+	reader := strings.NewReader(content)
+	err := e.FileSystem.Write(e.FilePath, reader)
+	if err != nil {
+		e.updateStatus(fmt.Sprintf("[red]Erreur de sauvegarde: %v", err))
+	} else {
+		e.refreshFileList()
+		e.previewFile(e.FilePath)
+		e.updateStatus(fmt.Sprintf("[green]Enregistré: %s", e.FilePath))
+	}
 }
