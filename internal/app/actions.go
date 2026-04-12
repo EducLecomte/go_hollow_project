@@ -124,14 +124,32 @@ func (e *EditorApp) pasteFile() {
 	}
 
 	baseName := filepath.Base(e.CopiedPath)
-	dst := filepath.Join(e.CurrentDir, baseName)
+	ext := filepath.Ext(baseName)
+	nameWithoutExt := strings.TrimSuffix(baseName, ext)
 
-	// Si on colle dans le même dossier, on ajoute un suffixe pour éviter l'écrasement
-	if e.CopiedPath == dst {
-		ext := filepath.Ext(baseName)
-		name := strings.TrimSuffix(baseName, ext)
-		dst = filepath.Join(e.CurrentDir, name+"_copy"+ext)
+	finalName := baseName
+	counter := 1
+
+	for {
+		exists := false
+		for _, f := range e.CurrentFiles {
+			if f.Name == finalName {
+				exists = true
+				break
+			}
+		}
+		if !exists {
+			break
+		}
+		if counter == 1 {
+			finalName = fmt.Sprintf("%s_copy%s", nameWithoutExt, ext)
+		} else {
+			finalName = fmt.Sprintf("%s_copy%d%s", nameWithoutExt, counter, ext)
+		}
+		counter++
 	}
+
+	dst := filepath.Join(e.CurrentDir, finalName)
 
 	err := e.FileSystem.Copy(e.CopiedPath, dst)
 	if err != nil {
@@ -140,7 +158,7 @@ func (e *EditorApp) pasteFile() {
 	}
 
 	e.refreshFileList()
-	e.updateStatusTemp(fmt.Sprintf("[green]Élément collé: %s", filepath.Base(dst)))
+	e.updateStatusTemp(fmt.Sprintf("[green]Élément collé: %s", finalName))
 }
 
 func (e *EditorApp) deleteElement(path string) {

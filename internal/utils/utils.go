@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	HelpMsgDefault = "F1: Aide | TAB: Visualiser | Ctrl+F: Fich. | Ctrl+D: Doss. | Ctrl+R: Suppr. | Ctrl+K/U: C/V | Ctrl+X: Quit"
-	HelpMsgEdit    = "F1: Aide | TAB: Retour | Flèches: Naviguer"
+	HelpMsgEdit    = "F1: Aide | TAB: Retour | Ctrl+K/U: Couper/Coller bloc | Flèches: Naviguer"
 	HelpMsgFiles   = "F1: Aide | TAB: Visualiser | Ctrl+F: Fich. | Ctrl+D: Doss. | Ctrl+R: Suppr. | Ctrl+K/U: C/V | Ctrl+X: Quit"
 
 	HelpContent = `
@@ -24,8 +24,8 @@ const (
  [yellow]Édition[white]
  -------
  Ctrl + S    : Sauvegarder le fichier courant
- Ctrl + K    : Couper la ligne de texte (Nano style)
- Ctrl + U/V  : Coller le texte (Uncut/Paste)
+ Ctrl + K    : Couper la ligne (concatène en bloc si répété)
+ Ctrl + U    : Coller le texte ou le bloc coupé
  `
 )
 

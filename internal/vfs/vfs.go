@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -87,6 +88,20 @@ func (l *LocalFS) Mkdir(path string) error {
 }
 
 func (l *LocalFS) Copy(src, dst string) error {
+	absSrc, err := filepath.Abs(src)
+	if err != nil {
+		return err
+	}
+	absDst, err := filepath.Abs(dst)
+	if err != nil {
+		return err
+	}
+	
+	// Empêche la copie d'un répertoire dans lui-même
+	if strings.HasPrefix(absDst, absSrc+string(filepath.Separator)) || absSrc == absDst {
+		return fmt.Errorf("impossible de copier un répertoire dans lui-même ou dans un de ses sous-répertoires")
+	}
+
 	info, err := os.Lstat(src)
 	if err != nil {
 		return err

@@ -35,7 +35,7 @@ func (e *EditorApp) showFullEditor(content string) {
 	// Instructions en bas de l'éditeur
 	footer := tview.NewTextView().
 		SetDynamicColors(true).
-		SetText(" [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+X:[white] Quitter")
+		SetText(" [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+K:[white] Couper bloc | [yellow]Ctrl+U:[white] Coller | [yellow]Ctrl+X:[white] Quitter")
 
 	layout := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(textArea, 0, 1, true).
@@ -44,8 +44,15 @@ func (e *EditorApp) showFullEditor(content string) {
 	e.Pages.AddPage("edit_screen", layout, true, true)
 	e.App.SetFocus(textArea)
 
+	lastActionWasCut := false
+
 	textArea.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyCtrlX || event.Key() == tcell.KeyEsc {
+		key := event.Key()
+		if key != tcell.KeyCtrlK {
+			lastActionWasCut = false
+		}
+
+		if key == tcell.KeyCtrlX || key == tcell.KeyEsc {
 			if textArea.GetText() != initialContent {
 				e.showSaveConfirmation(textArea.GetText())
 			} else {
@@ -54,30 +61,53 @@ func (e *EditorApp) showFullEditor(content string) {
 			}
 			return nil
 		}
-		if event.Key() == tcell.KeyCtrlS {
+		if key == tcell.KeyCtrlS {
 			e.saveFromFullEditor(textArea.GetText())
 			initialContent = textArea.GetText()
 			updateTitle(false)
 			return nil
 		}
-		if event.Key() == tcell.KeyCtrlK { // Couper la ligne (Nano style)
+		if key == tcell.KeyCtrlK { // Couper la ligne (Nano style)
 			text := textArea.GetText()
 			lines := strings.Split(text, "\n")
 			row, _, _, _ := textArea.GetCursor()
 			if row < len(lines) {
-				e.Clipboard = lines[row]
-				lines = append(lines[:row], lines[row+1:]...)
-				textArea.SetText(strings.Join(lines, "\n"), true)
+				if lastActionWasCut {
+					e.Clipboard += "\n" + lines[row]
+				} else {
+					e.Clipboard = lines[row]
+				}
+				lastActionWasCut = true
+
+				// Calculate byte offsets for the current line
+				start := 0
+				for i := 0; i < row; i++ {
+					start += len(lines[i]) + 1
+				}
+				
+				end := start + len(lines[row])
+				if row < len(lines)-1 {
+					end += 1 // include the trailing newline
+				} else if row > 0 {
+					start -= 1 // include the preceding newline if last line
+				}
+
+				textArea.Replace(start, end, "")
 			}
 			return nil
 		}
-		if event.Key() == tcell.KeyCtrlU { // Coller la ligne
+		if key == tcell.KeyCtrlU { // Coller la ligne
 			if e.Clipboard != "" {
 				text := textArea.GetText()
 				lines := strings.Split(text, "\n")
 				row, _, _, _ := textArea.GetCursor()
-				newLines := append(lines[:row], append([]string{e.Clipboard}, lines[row:]...)...)
-				textArea.SetText(strings.Join(newLines, "\n"), true)
+				
+				start := 0
+				for i := 0; i < row; i++ {
+					start += len(lines[i]) + 1
+				}
+				
+				textArea.Replace(start, start, e.Clipboard+"\n")
 			}
 			return nil
 		}

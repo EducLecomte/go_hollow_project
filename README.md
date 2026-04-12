@@ -52,8 +52,8 @@ type VFS interface {
 | `Ctrl + K` | Copier le fichier ou dossier sélectionné |
 | `Ctrl + U` | Coller l'élément dans le dossier actuel |
 | `Ctrl + S` | Sauvegarder le fichier (Éditeur) |
-| `Ctrl + K` | Couper la ligne entière (Éditeur) |
-| `Ctrl + U` | Coller la ligne coupée (Éditeur) |
+| `Ctrl + K` | Couper la ligne entière (concatène en bloc si répété) |
+| `Ctrl + U` | Coller le bloc de texte coupé (Éditeur) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier |
 
 ## Installation & Utilisation
@@ -83,7 +83,7 @@ go run .
 - Lecture et écriture réelle sur le disque.
 - Architecture factorisée pour la maintenabilité.
 - Indicateur visuel de modification dans l'éditeur.
-- Mécanique de "Cut & Paste" de ligne (Ctrl+K / Ctrl+U).
+- Mécanique de "Cut & Paste" de blocs de lignes sans perte du curseur (Ctrl+K / Ctrl+U).
 
 ### En cours / À venir
 - [ ] **Client FTP** : Implémentation de `FTPFS` pour l'édition distante.
