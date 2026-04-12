@@ -29,6 +29,10 @@ type EditorApp struct {
 
 	PreviousFS   vfs.VFS
 	PreviousDir  string
+
+	// État de recherche
+	LastSearch    string
+	LastSearchPos int
 }
 
 func NewEditorApp() *EditorApp {
@@ -103,13 +107,26 @@ func (e *EditorApp) setupUI() {
 	e.Viewer.SetDynamicColors(true).SetRegions(true) // Active le support des couleurs ANSI/Tags
 	e.Viewer.SetFocusFunc(func() {
 		e.Viewer.SetBorderColor(tcell.ColorYellow)
-		e.updateStatus(utils.HelpMsgEdit)
+		e.updateStatus(utils.HelpMsgView)
 	})
 	e.Viewer.SetBlurFunc(func() {
 		e.Viewer.SetBorderColor(tcell.ColorWhite)
 	})
 	e.Viewer.SetWrap(true) // Rétablit le retour à la ligne automatique
 	e.Viewer.SetDrawFunc(nil) // Supprime la fonction de synchronisation obsolète
+
+	// Capture de F1 et autres touches dans le visualiseur
+	e.Viewer.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyF1 {
+			e.showHelp()
+			return nil
+		}
+		if event.Key() == tcell.KeyTab {
+			e.App.SetFocus(e.FileList)
+			return nil
+		}
+		return event
+	})
 
 	e.Status.SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
 	e.updateStatus(utils.HelpMsgDefault)
@@ -146,10 +163,8 @@ func (e *EditorApp) refreshFileList() {
 	for _, f := range files {
 		var displayName string
 		if f.IsDir {
-			// Dossier : On accole le slash au nom pour une identification immédiate
-			displayName = "[darkorange]" + f.Name + "/"
+			displayName = f.Name + "/"
 		} else {
-			// Fichier : Nom simple
 			displayName = f.Name
 		}
 		e.FileList.AddItem(displayName, "", 0, nil)
@@ -169,7 +184,10 @@ func (e *EditorApp) updateStatusTemp(msg string) {
 		// tview n'est pas thread-safe, on utilise QueueUpdateDraw pour mettre à jour l'UI
 		e.App.QueueUpdateDraw(func() {
 			// Restauration du message d'aide selon le focus actuel
-			if e.App.GetFocus() == e.Viewer {
+			focus := e.App.GetFocus()
+			if focus == e.Viewer {
+				e.updateStatus(utils.HelpMsgView)
+			} else if _, ok := focus.(*tview.TextArea); ok {
 				e.updateStatus(utils.HelpMsgEdit)
 			} else {
 				e.updateStatus(utils.HelpMsgFiles)

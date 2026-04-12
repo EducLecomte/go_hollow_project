@@ -8,7 +8,8 @@ import (
 
 const (
 	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+E:[white] Extr. | [yellow]Suppr:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
-	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Retour | [yellow]Ctrl+K/U:[white] Couper/Coller bloc | [yellow]Flèches:[white] Naviguer"
+	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] Couper/Coller | [yellow]Esc:[white] Quitter"
+	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Explorer | [yellow]Flèches/Molette:[white] Défiler"
 	HelpMsgFiles   = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+E:[white] Extr. | [yellow]Suppr:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
 
 	HelpContent = `
@@ -29,6 +30,7 @@ const (
  [yellow]Édition[white]
  -------
  Ctrl + S    : Sauvegarder le fichier courant
+ Ctrl + F    : Rechercher un texte (Entrée pour suivant)
  Ctrl + K    : Couper la ligne (concatène en bloc si répété)
  Ctrl + U    : Coller le texte ou le bloc coupé
  `

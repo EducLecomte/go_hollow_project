@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -16,6 +17,7 @@ func (e *EditorApp) showFullEditor(content string) {
 	textArea := tview.NewTextArea()
 	textArea.SetText(content, false)
 	textArea.SetBorder(true)
+	textArea.SetSelectedStyle(tcell.StyleDefault.Background(tcell.ColorOrange).Foreground(tcell.ColorBlack))
 
 	// Barre latérale pour les numéros de ligne
 	lineNumbers := tview.NewTextView().
@@ -77,7 +79,7 @@ func (e *EditorApp) showFullEditor(content string) {
 	footer := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
-		SetText(" [yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+K:[white] Couper bloc | [yellow]Ctrl+U:[white] Coller | [yellow]Ctrl+X:[white] Quitter")
+		SetText(utils.HelpMsgEdit)
 
 	// Layout principal avec barre latérale
 	editorLayout := tview.NewFlex().SetDirection(tview.FlexColumn).
@@ -108,10 +110,18 @@ func (e *EditorApp) showFullEditor(content string) {
 			}
 			return nil
 		}
+		if key == tcell.KeyF1 {
+			e.showHelp()
+			return nil
+		}
 		if key == tcell.KeyCtrlS {
 			e.saveFromFullEditor(textArea.GetText())
 			initialContent = textArea.GetText()
 			updateTitle(false)
+			return nil
+		}
+		if key == tcell.KeyCtrlF {
+			e.showSearchDialog(textArea)
 			return nil
 		}
 		if key == tcell.KeyCtrlK { // Couper la ligne (Nano style)
@@ -172,5 +182,97 @@ func (e *EditorApp) saveFromFullEditor(content string) {
 		e.refreshFileList()
 		e.previewFile(e.FilePath)
 		e.updateStatus(fmt.Sprintf("[green]Enregistré: %s", e.FilePath))
+	}
+}
+
+// showSearchDialog affiche une barre de recherche discrète en bas
+func (e *EditorApp) showSearchDialog(textArea *tview.TextArea) {
+	inputField := tview.NewInputField().
+		SetLabel(" Rechercher: ").
+		SetText(e.LastSearch)
+	inputField.SetFieldBackgroundColor(tcell.ColorDarkBlue)
+	inputField.SetBorder(true)
+
+	// Layout minimaliste pour la barre de recherche
+	searchBar := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(inputField, 40, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	// On place la barre en bas, juste au dessus du footer
+	searchContainer := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false).
+		AddItem(searchBar, 3, 1, true).
+		AddItem(nil, 1, 0, false)
+
+	e.Pages.AddPage("search", searchContainer, true, true)
+	e.App.SetFocus(inputField)
+
+	inputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			term := inputField.GetText()
+			if term != "" {
+				e.findNext(textArea, term)
+			}
+		} else if key == tcell.KeyEsc {
+			e.Pages.RemovePage("search")
+			e.App.SetFocus(textArea)
+		}
+	})
+}
+
+// findNext cherche l'occurrence suivante d'un terme
+func (e *EditorApp) findNext(textArea *tview.TextArea, term string) {
+	text := textArea.GetText()
+	if term == "" {
+		return
+	}
+
+	searchSpace := text
+	offset := 0
+	if term == e.LastSearch {
+		offset = e.LastSearchPos
+		if offset < len(text) {
+			searchSpace = text[offset:]
+		} else {
+			offset = 0
+		}
+	}
+
+	idx := strings.Index(strings.ToLower(searchSpace), strings.ToLower(term))
+	if idx == -1 && offset > 0 {
+		// On recommence au début (Loop)
+		offset = 0
+		searchSpace = text
+		idx = strings.Index(strings.ToLower(searchSpace), strings.ToLower(term))
+	}
+
+	if idx != -1 {
+		matchStart := offset + idx
+		matchEnd := matchStart + len(term)
+		e.LastSearch = term
+		e.LastSearchPos = matchEnd
+
+		textArea.Select(matchStart, matchEnd)
+
+		// On calcule la ligne du match pour SetOffset
+		linesBefore := strings.Split(text[:matchStart], "\n")
+		row := len(linesBefore) - 1
+		
+		_, _, _, height := textArea.GetInnerRect()
+		if height <= 0 {
+			height = 20 // Fallback
+		}
+		
+		// Centrer le résultat verticalement
+		targetOffset := row - (height / 2)
+		if targetOffset < 0 {
+			targetOffset = 0
+		}
+		textArea.SetOffset(targetOffset, 0)
+
+		e.updateStatusTemp(fmt.Sprintf("[green]Trouvé: '%s'", term))
+	} else {
+		e.updateStatusTemp("[yellow]Aucune occurrence trouvée")
 	}
 }
