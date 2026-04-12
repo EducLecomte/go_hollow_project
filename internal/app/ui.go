@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/EducLecomte/go_hollow_project/internal/utils"
@@ -67,12 +68,64 @@ func (e *EditorApp) setupUI() {
 		SetBackgroundColor(tcell.ColorDarkGreen)
 
 	e.FileList.SetBorder(true).SetTitle(" Exploreur ").SetBorderColor(tcell.ColorYellow)
-	e.FileList.ShowSecondaryText(false) // Rend la liste compacte (une seule ligne)
+	e.FileList.ShowSecondaryText(false)
 	e.FileList.SetSelectedBackgroundColor(tcell.ColorWhite).
 		SetSelectedTextColor(tcell.ColorBlack)
+	
 	e.FileList.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
 		e.handleFileSelection(index)
 	})
+
+	// Gestion dynamique de la couleur des dossiers et mise à jour de l'encart d'info
+	isUpdatingList := false
+	e.FileList.SetChangedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
+		// 1. Mise à jour de l'encart d'informations
+		if index == 0 {
+			e.FileSizeBox.SetText("[gray]Parent Directory")
+			e.Viewer.SetText("").SetTitle(" Visualiseur ")
+		} else if index-1 < len(e.CurrentFiles) {
+			file := e.CurrentFiles[index-1]
+			modTimeStr := file.ModTime.Format("2006-01-02 15:04")
+			if file.IsDir {
+				e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", modTimeStr, file.Permissions, file.Owner))
+				e.previewDirectory(filepath.Join(e.CurrentDir, file.Name))
+			} else {
+				e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner))
+				e.previewFile(filepath.Join(e.CurrentDir, file.Name))
+			}
+		}
+
+		// 2. Gestion dynamique de la couleur des dossiers pour le contraste
+		if isUpdatingList {
+			return
+		}
+		isUpdatingList = true
+		defer func() { isUpdatingList = false }()
+
+		for i := 0; i < e.FileList.GetItemCount(); i++ {
+			m, s := e.FileList.GetItemText(i)
+			if !strings.HasSuffix(m, "/") && !strings.HasPrefix(m, "[#ff8c00]") {
+				continue
+			}
+
+			// Nettoyage du nom
+			name := strings.TrimPrefix(m, "[#ff8c00]")
+			if strings.HasSuffix(name, "/") {
+				if i == index {
+					// Sélectionné : pas de tag pour être noir sur blanc
+					if m != name {
+						e.FileList.SetItemText(i, name, s)
+					}
+				} else {
+					// Non sélectionné : orange
+					if !strings.HasPrefix(m, "[#ff8c00]") {
+						e.FileList.SetItemText(i, "[#ff8c00]"+name, s)
+					}
+				}
+			}
+		}
+	})
+
 	e.FileList.SetFocusFunc(func() {
 		e.FileList.SetBorderColor(tcell.ColorYellow)
 		e.updateStatus(utils.HelpMsgFiles)
@@ -84,24 +137,6 @@ func (e *EditorApp) setupUI() {
 	// Encart pour le poids du fichier
 	e.FileSizeBox.SetBorder(true).SetTitle(" Info ")
 	e.FileSizeBox.SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
-
-	// Mise à jour de l'encart quand on navigue dans la liste
-	e.FileList.SetChangedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
-		if index == 0 {
-			e.FileSizeBox.SetText("[gray]Parent Directory")
-			e.Viewer.SetText("").SetTitle(" Visualiseur ")
-			return
-		}
-		file := e.CurrentFiles[index-1]
-		modTimeStr := file.ModTime.Format("2006-01-02 15:04")
-		if file.IsDir {
-			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", modTimeStr, file.Permissions, file.Owner))
-			e.previewDirectory(filepath.Join(e.CurrentDir, file.Name))
-		} else {
-			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner))
-			e.previewFile(filepath.Join(e.CurrentDir, file.Name))
-		}
-	})
 
 	e.Viewer.SetBorder(true).SetTitle(" Visualiseur ").SetBorderColor(tcell.ColorWhite)
 	e.Viewer.SetDynamicColors(true).SetRegions(true) // Active le support des couleurs ANSI/Tags
