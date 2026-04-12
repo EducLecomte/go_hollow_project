@@ -72,20 +72,34 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Installation de Hollow terminée."
-echo ""
-echo "Configuration recommandée :"
-echo "Pour utiliser Hollow partout et activer le changement de répertoire"
-echo "automatique à la sortie, ajoutez ceci à votre ~/.bashrc ou ~/.zshrc :"
-echo ""
-echo "-------------------------------------------------------------------"
-echo "function hollow() {"
-echo "    local hollow_bin=\"$INSTALL_DIR/$BINARY_NAME\""
-echo "    \$hollow_bin \"\$@\""
-echo "    local tmp_file=\"/tmp/hollow_cwd_\$USER\""
-echo "    if [ -f \"\$tmp_file\" ]; then"
-echo "        cd \"\$(cat \"\$tmp_file\")\" && rm \"\$tmp_file\""
-echo "    fi"
-echo "}"
-echo "-------------------------------------------------------------------"
-echo ""
-echo "Une fois ajouté, relancez votre terminal ou tapez : source ~/.bashrc"
+
+# Détection de l'utilisateur réel pour injecter la configuration au bon endroit
+ACTUAL_USER=${SUDO_USER:-$USER}
+ACTUAL_HOME=$(getent passwd "$ACTUAL_USER" | cut -d: -f6 || echo "$HOME")
+
+SHELL_FUNC="
+# --- Hollow Shell Integration ---
+function hollow() {
+    local hollow_bin=\"$INSTALL_DIR/$BINARY_NAME\"
+    \$hollow_bin \"\$@\"
+    local tmp_file=\"/tmp/hollow_cwd_\$USER\"
+    if [ -f \"\$tmp_file\" ]; then
+        cd \"\$(cat \"\$tmp_file\")\" && rm \"\$tmp_file\"
+    fi
+}
+"
+
+echo "Configuration du shell pour l'utilisateur : $ACTUAL_USER"
+
+for RC_FILE in "$ACTUAL_HOME/.bashrc" "$ACTUAL_HOME/.zshrc"; do
+    if [ -f "$RC_FILE" ]; then
+        if ! grep -q "function hollow()" "$RC_FILE"; then
+            echo "Ajout de la fonction hollow dans $RC_FILE..."
+            echo "$SHELL_FUNC" >> "$RC_FILE"
+        else
+            echo "La fonction hollow est déjà présente dans $RC_FILE."
+        fi
+    fi
+done
+
+echo "Installation réussie ! Relancez votre terminal ou tapez : source $ACTUAL_HOME/.bashrc"
