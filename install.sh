@@ -17,7 +17,7 @@ fi
 echo "Compilation dans : $PROJECT_DIR"
 cd "$PROJECT_DIR"
 
-go build -o "$BINARY_NAME" .
+go build -o "$BINARY_NAME" ./cmd/hollow
 
 echo "Compilation terminée."
 echo ""
