@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -14,8 +15,48 @@ func (e *EditorApp) showFullEditor(content string) {
 	initialContent := content
 	textArea := tview.NewTextArea()
 	textArea.SetText(content, false)
-	// textArea.SetShowLineNumbers(true) // Nécessite une mise à jour : go get -u github.com/rivo/tview
 	textArea.SetBorder(true)
+
+	// Barre latérale pour les numéros de ligne
+	lineNumbers := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignRight)
+	lineNumbers.SetBackgroundColor(tcell.ColorDefault)
+
+	updateLineNumbers := func() {
+		_, _, _, height := textArea.GetInnerRect()
+		if height <= 0 {
+			height = 40 // Fallback raisonnable
+		}
+		rowOffset, _ := textArea.GetOffset()
+		text := textArea.GetText()
+		lines := strings.Split(text, "\n")
+		totalLines := len(lines)
+
+		var sb strings.Builder
+		sb.WriteString("\n") // Compense la bordure du TextArea
+		for i := 0; i < height; i++ {
+			lineIdx := rowOffset + i
+			if lineIdx < totalLines {
+				sb.WriteString(fmt.Sprintf("[#555555]%3d [white]\n", lineIdx+1))
+			} else {
+				sb.WriteString("\n")
+			}
+		}
+		lineNumbers.SetText(sb.String())
+	}
+
+	textArea.SetMovedFunc(func() {
+		updateLineNumbers()
+	})
+
+	// Appel initial après un court délai pour laisser tview calculer les rects
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		e.App.QueueUpdateDraw(func() {
+			updateLineNumbers()
+		})
+	}()
 
 	// Fonction pour mettre à jour le titre avec un indicateur de modification
 	updateTitle := func(modified bool) {
@@ -38,8 +79,13 @@ func (e *EditorApp) showFullEditor(content string) {
 		SetTextAlign(tview.AlignCenter).
 		SetText(" [yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+K:[white] Couper bloc | [yellow]Ctrl+U:[white] Coller | [yellow]Ctrl+X:[white] Quitter")
 
+	// Layout principal avec barre latérale
+	editorLayout := tview.NewFlex().SetDirection(tview.FlexColumn).
+		AddItem(lineNumbers, 4, 0, false).
+		AddItem(textArea, 0, 1, true)
+
 	layout := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(textArea, 0, 1, true).
+		AddItem(editorLayout, 0, 1, true).
 		AddItem(footer, 1, 0, false)
 
 	e.Pages.AddPage("edit_screen", layout, true, true)

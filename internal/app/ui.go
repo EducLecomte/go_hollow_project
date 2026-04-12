@@ -108,6 +108,8 @@ func (e *EditorApp) setupUI() {
 	e.Viewer.SetBlurFunc(func() {
 		e.Viewer.SetBorderColor(tcell.ColorWhite)
 	})
+	e.Viewer.SetWrap(true) // Rétablit le retour à la ligne automatique
+	e.Viewer.SetDrawFunc(nil) // Supprime la fonction de synchronisation obsolète
 
 	e.Status.SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
 	e.updateStatus(utils.HelpMsgDefault)
