@@ -51,10 +51,9 @@ Le projet repose sur une abstraction puissante du système de fichiers (**VFS**)
 
 ### Prérequis
 - `curl` et `wget` (pour l'installation rapide)
-- Go 1.21+ (si vous souhaitez compiler depuis les sources)
 
-### Installation rapide
-Pour installer Hollow instantanément (téléchargement automatique du binaire correspondant à votre architecture) :
+### Installation (Utilisateurs)
+Pour installer la version native pré-compilée sur Linux (Debian, Ubuntu, Kali, etc.) sans avoir besoin de Go :
 
 ```bash
 curl -sL https://raw.githubusercontent.com/EducLecomte/go_hollow_project/main/install.sh | bash
