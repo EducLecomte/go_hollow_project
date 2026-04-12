@@ -50,10 +50,17 @@ Le projet repose sur une abstraction puissante du système de fichiers (**VFS**)
 ## Installation & Utilisation
 
 ### Prérequis
-- Go 1.18+
+- `curl` et `wget` (pour l'installation rapide)
+- Go 1.21+ (si vous souhaitez compiler depuis les sources)
 
 ### Installation rapide
-Utilisez le script d'installation fourni pour compiler le projet et configurer la synchronisation du shell :
+Pour installer Hollow instantanément (téléchargement automatique du binaire correspondant à votre architecture) :
+
+```bash
+curl -sL https://raw.githubusercontent.com/EducLecomte/go_hollow_project/main/install.sh | bash
+```
+
+Ou via le script local si vous avez déjà cloné le projet :
 ```bash
 chmod +x install.sh
 ./install.sh
