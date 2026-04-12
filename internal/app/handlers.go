@@ -9,8 +9,8 @@ func (e *EditorApp) setupHandlers() {
 	e.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		allowedCtrlKeys := map[tcell.Key]bool{
 			tcell.KeyCtrlS: true, tcell.KeyCtrlF: true, tcell.KeyCtrlD: true,
-			tcell.KeyCtrlR: true, tcell.KeyCtrlK: true, tcell.KeyCtrlU: true,
-			tcell.KeyCtrlV: true, tcell.KeyCtrlX: true,
+			tcell.KeyCtrlK: true, tcell.KeyCtrlU: true,
+			tcell.KeyCtrlV: true, tcell.KeyCtrlX: true, tcell.KeyCtrlE: true,
 			tcell.KeyTab: true, tcell.KeyEnter: true,
 			tcell.KeyBackspace: true, tcell.KeyBackspace2: true,
 		}
@@ -19,7 +19,8 @@ func (e *EditorApp) setupHandlers() {
 		case tcell.KeyF1:
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
 				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") ||
-				e.Pages.HasPage("delete") {
+				e.Pages.HasPage("delete") || e.Pages.HasPage("save_confirm") ||
+				e.Pages.HasPage("ftp") {
 				return event
 			}
 			e.showHelp()

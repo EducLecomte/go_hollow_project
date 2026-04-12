@@ -1,6 +1,7 @@
 package vfs
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -29,6 +30,8 @@ type VFS interface {
 	Mkdir(path string) error
 	Copy(src, dst string) error
 	Remove(path string) error
+	Stat(path string) (FileInfo, error)
+	Close() error
 }
 
 // LocalFS implémente VFS pour le système de fichiers local
@@ -141,4 +144,70 @@ func (l *LocalFS) Copy(src, dst string) error {
 
 func (l *LocalFS) Remove(path string) error {
 	return os.RemoveAll(path)
+}
+
+func (l *LocalFS) Stat(path string) (FileInfo, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return FileInfo{}, err
+	}
+
+	owner := "unknown"
+	if stat, ok := info.Sys().(*syscall.Stat_t); ok {
+		u, err := user.LookupId(fmt.Sprint(stat.Uid))
+		if err == nil {
+			owner = u.Username
+		}
+	}
+
+	return FileInfo{
+		Name:        info.Name(),
+		IsDir:       info.IsDir(),
+		Size:        info.Size(),
+		ModTime:     info.ModTime(),
+		Permissions: info.Mode().String(),
+		Owner:       owner,
+	}, nil
+}
+
+func (l *LocalFS) Close() error {
+	return nil
+}
+
+// CopyRecursiveBetweenVFS permet de copier des données entre deux systèmes de fichiers différents
+func CopyRecursiveBetweenVFS(ctx context.Context, srcFS, dstFS VFS, src, dst string) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
+	info, err := srcFS.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	if info.IsDir {
+		if err := dstFS.Mkdir(dst); err != nil && !os.IsExist(err) {
+			return err
+		}
+		entries, err := srcFS.List(src)
+		if err != nil {
+			return err
+		}
+		for _, entry := range entries {
+			if err := CopyRecursiveBetweenVFS(ctx, srcFS, dstFS, filepath.Join(src, entry.Name), filepath.Join(dst, entry.Name)); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	reader, err := srcFS.Read(src)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	return dstFS.Write(dst, reader)
 }

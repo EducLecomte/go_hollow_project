@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] Copier/Coller | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+E:[white] Extr. | [yellow]Suppr:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
 	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Retour | [yellow]Ctrl+K/U:[white] Couper/Coller bloc | [yellow]Flèches:[white] Naviguer"
-	HelpMsgFiles   = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] Copier/Coller | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgFiles   = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+E:[white] Extr. | [yellow]Suppr:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
 
 	HelpContent = `
  [yellow]Navigation & Système[white]
@@ -20,7 +20,8 @@ const (
  Ctrl + X    : Quitter l'app (depuis l'explorateur)
  Ctrl + F    : Créer un nouveau fichier (depuis l'explorateur)
  Ctrl + D    : Créer un nouveau dossier (depuis l'explorateur)
- Ctrl + R    : Supprimer un fichier/dossier (depuis l'explorateur)
+ Suppr       : Supprimer un fichier/dossier (depuis l'explorateur)
+ Ctrl + E    : Extraire une archive (depuis l'explorateur)
  Ctrl + K    : Copier un fichier/dossier (depuis l'explorateur)
  Ctrl + U    : Coller un fichier/dossier (depuis l'explorateur)
  Entrée      : Ouvrir un fichier / Entrer dans un dossier

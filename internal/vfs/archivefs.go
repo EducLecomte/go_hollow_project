@@ -303,3 +303,18 @@ func (a *ArchiveFS) Copy(src, dst string) error {
 func (a *ArchiveFS) Remove(path string) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
+
+func (a *ArchiveFS) Stat(path string) (FileInfo, error) {
+	node := a.getNode(path)
+	if node == nil {
+		return FileInfo{}, fmt.Errorf("fichier non trouvé")
+	}
+	return node.Info, nil
+}
+
+func (a *ArchiveFS) Close() error {
+	if a.ZipReader != nil {
+		return a.ZipReader.Close()
+	}
+	return nil
+}

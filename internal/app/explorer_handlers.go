@@ -36,7 +36,10 @@ func (e *EditorApp) setupExplorerHandlers() {
 		case tcell.KeyCtrlU:
 			e.pasteFile()
 			return nil
-		case tcell.KeyCtrlR:
+		case tcell.KeyCtrlE:
+			e.extractSelectedArchive()
+			return nil
+		case tcell.KeyDelete:
 			e.showDeleteConfirmation()
 			return nil
 		}
@@ -54,12 +57,14 @@ func (e *EditorApp) handleFileSelection(index int) {
 				e.CurrentDir = e.PreviousDir
 				e.PreviousFS = nil
 				e.refreshFileList()
+				e.updateStatus(utils.HelpMsgFiles)
 				return
 			}
 		}
 
 		e.CurrentDir = filepath.Dir(e.CurrentDir)
 		e.refreshFileList()
+		e.updateStatus(utils.HelpMsgFiles)
 		return
 	}
 
@@ -85,9 +90,9 @@ func (e *EditorApp) handleFileSelection(index int) {
 				
 				if err != nil {
 					if err == context.Canceled {
-						e.updateStatus("[yellow]Ouverture annulée.")
+						e.updateStatusTemp("[yellow]Ouverture annulée.")
 					} else {
-						e.updateStatus(fmt.Sprintf("[red]Erreur d'ouverture d'archive: %v", err))
+						e.updateStatusTemp(fmt.Sprintf("[red]Erreur d'ouverture d'archive: %v", err))
 					}
 					return
 				}
@@ -96,7 +101,7 @@ func (e *EditorApp) handleFileSelection(index int) {
 				e.FileSystem = archiveFS
 				e.CurrentDir = "/"
 				e.refreshFileList()
-				e.updateStatus(fmt.Sprintf("[green]Exploration de l'archive: %s", file.Name))
+				e.updateStatusTemp(fmt.Sprintf("[green]Exploration de l'archive: %s", file.Name))
 			})
 		}()
 	} else {

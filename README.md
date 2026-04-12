@@ -49,6 +49,7 @@ type VFS interface {
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |
 | `Ctrl + R` | Supprimer le fichier ou dossier sélectionné |
+| `Ctrl + E` | Extraire l'archive sélectionnée |
 | `Ctrl + K` | Copier le fichier (Explorateur) / Couper la ligne (Éditeur) |
 | `Ctrl + U` | Coller le fichier (Explorateur) / Coller le bloc (Éditeur) |
 | `Ctrl + S` | Sauvegarder le fichier (Éditeur) |
@@ -72,7 +73,8 @@ chmod +x install.sh
 ## État du Projet
 
 ### Implémenté
-- Navigation locale avec gestion des métadonnées (taille).
+- Navigation locale et exploration d'archives (.zip, .tar, .tar.gz).
+- Extraction d'archives avec retour visuel (Ctrl+E).
 - Lecture et écriture réelle sur le disque.
 - Architecture factorisée pour la maintenabilité.
 - Indicateur visuel de modification dans l'éditeur.

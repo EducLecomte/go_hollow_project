@@ -2,6 +2,7 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/EducLecomte/go_hollow_project/internal/utils"
+	"github.com/EducLecomte/go_hollow_project/internal/vfs"
 	"github.com/rivo/tview"
 )
 
@@ -175,4 +177,90 @@ func (e *EditorApp) deleteElement(path string) {
 func (e *EditorApp) saveLastDir() {
 	path := fmt.Sprintf("/tmp/hollow_cwd_%s", os.Getenv("USER"))
 	_ = os.WriteFile(path, []byte(e.CurrentDir), 0644)
+}
+
+func (e *EditorApp) extractSelectedArchive() {
+	index := e.FileList.GetCurrentItem()
+	if index <= 0 || index-1 >= len(e.CurrentFiles) {
+		return
+	}
+	file := e.CurrentFiles[index-1]
+
+	var srcFS vfs.VFS
+	var dstFS vfs.VFS
+	var srcPath string
+	var destPath string
+	var destName string
+
+	// Détection du mode : sommes-nous DANS une archive ou en train d'en sélectionner une sur le disque ?
+	archiveFS, isInside := e.FileSystem.(*vfs.ArchiveFS)
+
+	if isInside {
+		// MODE INDIVIDUEL : On extrait l'élément sélectionné vers le dossier hôte de l'archive
+		srcFS = e.FileSystem
+		dstFS = e.PreviousFS
+		srcPath = filepath.Join(e.CurrentDir, file.Name)
+		
+		hostDir := filepath.Dir(archiveFS.ArchivePath)
+		destName = file.Name
+		destPath = filepath.Join(hostDir, destName)
+	} else {
+		// MODE COMPLET : On extrait l'archive sélectionnée vers un dossier "_extracted"
+		if !utils.IsArchive(file.Name) {
+			e.updateStatusTemp("[red]L'élément sélectionné n'est pas une archive")
+			return
+		}
+
+		archivePath := filepath.Join(e.CurrentDir, file.Name)
+		
+		// Calcul du dossier de destination
+		ext := filepath.Ext(file.Name)
+		if strings.HasSuffix(strings.ToLower(file.Name), ".tar.gz") {
+			destName = strings.TrimSuffix(file.Name, ".tar.gz")
+		} else if strings.HasSuffix(strings.ToLower(file.Name), ".tgz") {
+			destName = strings.TrimSuffix(file.Name, ".tgz")
+		} else {
+			destName = strings.TrimSuffix(file.Name, ext)
+		}
+		destName += "_extracted"
+		destPath = filepath.Join(e.CurrentDir, destName)
+
+		// Création d'un FS temporaire pour lire l'archive
+		ctxTemp, cancelTemp := context.WithCancel(context.Background())
+		tempFS, err := vfs.NewArchiveFS(ctxTemp, archivePath)
+		if err != nil {
+			cancelTemp()
+			e.updateStatusTemp(fmt.Sprintf("[red]Erreur ouverture archive: %v", err))
+			return
+		}
+		// On utilisera ce FS pour l'extraction
+		srcFS = tempFS
+		dstFS = e.FileSystem // On est sur le LocalFS
+		srcPath = "/"
+		defer cancelTemp()
+		defer tempFS.Close()
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	e.showLoadingDialog("Extraction", fmt.Sprintf("Extraction de %s...", file.Name), cancel)
+
+	go func() {
+		err := vfs.CopyRecursiveBetweenVFS(ctx, srcFS, dstFS, srcPath, destPath)
+
+		e.App.QueueUpdateDraw(func() {
+			e.Pages.RemovePage("loading")
+			if err != nil {
+				if err == context.Canceled {
+					e.updateStatusTemp("[yellow]Extraction annulée.")
+				} else {
+					e.updateStatusTemp(fmt.Sprintf("[red]Erreur extraction: %v", err))
+				}
+			} else {
+				if !isInside {
+					e.refreshFileList()
+				}
+				e.updateStatusTemp(fmt.Sprintf("[green]Extraction réussie: %s", destName))
+			}
+		})
+	}()
 }
