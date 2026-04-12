@@ -35,7 +35,8 @@ func (e *EditorApp) showFullEditor(content string) {
 	// Instructions en bas de l'éditeur
 	footer := tview.NewTextView().
 		SetDynamicColors(true).
-		SetText(" [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+K:[white] Couper bloc | [yellow]Ctrl+U:[white] Coller | [yellow]Ctrl+X:[white] Quitter")
+		SetTextAlign(tview.AlignCenter).
+		SetText(" [yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+K:[white] Couper bloc | [yellow]Ctrl+U:[white] Coller | [yellow]Ctrl+X:[white] Quitter")
 
 	layout := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(textArea, 0, 1, true).

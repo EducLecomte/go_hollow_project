@@ -3,9 +3,9 @@ package utils
 import "fmt"
 
 const (
-	HelpMsgDefault = "F1: Aide | TAB: Visualiser | Ctrl+F: Fich. | Ctrl+D: Doss. | Ctrl+R: Suppr. | Ctrl+K/U: C/V | Ctrl+X: Quit"
-	HelpMsgEdit    = "F1: Aide | TAB: Retour | Ctrl+K/U: Couper/Coller bloc | Flèches: Naviguer"
-	HelpMsgFiles   = "F1: Aide | TAB: Visualiser | Ctrl+F: Fich. | Ctrl+D: Doss. | Ctrl+R: Suppr. | Ctrl+K/U: C/V | Ctrl+X: Quit"
+	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Retour | [yellow]Ctrl+K/U:[white] Couper/Coller bloc | [yellow]Flèches:[white] Naviguer"
+	HelpMsgFiles   = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
 
 	HelpContent = `
  [yellow]Navigation & Système[white]
