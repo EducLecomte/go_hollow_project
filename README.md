@@ -11,8 +11,9 @@ Ce projet est développé avec une IA, dans un but récréatif et éducatif.
 
 - **Explorateur de fichiers intégré** : Navigation fluide dans l'arborescence locale.
 - **Prévisualisation intelligente** : Coloration syntaxique pour les fichiers (via Chroma) et vue arborescente pour les dossiers.
-- **Éditeur de texte avancé** : Mode plein écran avec indicateur d'état (`*`), support de la coloration et gestion des fins de ligne.
+- **Éditeur de texte avancé** : Mode plein écran avec numérotation des lignes, indicateur d'état (`*`), et gestion des fins de ligne.
 - **Manipulation de lignes (Nano-style)** : Raccourcis `Ctrl+K` et `Ctrl+U` pour couper et coller des lignes entières.
+- **Recherche intégrée** : `Ctrl+F` pour rechercher rapidement des termes dans l'éditeur avec centrage automatique sur le résultat.
 - **Système de Fichiers Virtuel (VFS)** : Support natif du système local et des archives (Lecture seule).
 - **Aide contextuelle** : Barre de raccourcis dynamique et documentation interactive via `F1`.
 - **Sauvegarde non-interruptive** : `Ctrl+S` enregistre votre travail sans fermer l'éditeur.
@@ -76,15 +77,14 @@ chmod +x install.sh
 - Navigation locale et exploration d'archives (.zip, .tar, .tar.gz).
 - Extraction d'archives avec retour visuel (Ctrl+E).
 - Lecture et écriture réelle sur le disque.
-- Architecture factorisée pour la maintenabilité.
 - Indicateur visuel de modification dans l'éditeur.
 - Mécanique de "Cut & Paste" de blocs de lignes sans perte du curseur (Ctrl+K / Ctrl+U).
 - Explorateur d'archives: Navigation transparente dans les fichiers `.zip`, `.tar` et `.tar.gz`.
+- Recherche textuelle dans l'éditeur (Ctrl+F).
+- Numérotation dynamique des lignes.
 
 ### En cours / À venir
 - [ ] **Client FTP** : Implémentation de `FTPFS` pour l'édition distante.
-- [ ] **Recherche avancée** : Logique de recherche textuelle avec surlignage.
-- [ ] **Numérotation des lignes** : Activation après mise à jour de la bibliothèque TUI.
 
 ---
 *Dernière mise à jour : Dimanche 12 Avril 2026 - 12:45*
