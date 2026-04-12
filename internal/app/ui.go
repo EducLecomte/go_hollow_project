@@ -17,7 +17,7 @@ type EditorApp struct {
 	PathBar      *tview.TextView
 	FileList     *tview.List
 	FileSizeBox  *tview.TextView
-	Viewer       *tview.TextArea
+	Viewer       *tview.TextView
 	Status       *tview.TextView
 	Pages        *tview.Pages
 	FilePath     string
@@ -40,7 +40,7 @@ func NewEditorApp() *EditorApp {
 		PathBar:     tview.NewTextView(),
 		FileList:    tview.NewList(),
 		FileSizeBox: tview.NewTextView(),
-		Viewer:      tview.NewTextArea(),
+		Viewer:      tview.NewTextView(),
 		Status:      tview.NewTextView(),
 		Pages:       tview.NewPages(),
 		CurrentDir:  wd,
@@ -87,7 +87,7 @@ func (e *EditorApp) setupUI() {
 		modTimeStr := file.ModTime.Format("2006-01-02 15:04")
 		if file.IsDir {
 			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", modTimeStr, file.Permissions, file.Owner))
-			e.Viewer.SetText("", false)
+			e.Viewer.SetText("")
 			e.Viewer.SetTitle(" Visualiseur ")
 		} else {
 			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner))
@@ -96,6 +96,7 @@ func (e *EditorApp) setupUI() {
 	})
 
 	e.Viewer.SetBorder(true).SetTitle(" Visualiseur ").SetBorderColor(tcell.ColorWhite)
+	e.Viewer.SetDynamicColors(true).SetRegions(true) // Active le support des couleurs ANSI/Tags
 	e.Viewer.SetFocusFunc(func() {
 		e.Viewer.SetBorderColor(tcell.ColorYellow)
 		e.updateStatus(utils.HelpMsgEdit)

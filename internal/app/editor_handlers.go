@@ -11,13 +11,10 @@ func (e *EditorApp) setupEditorHandlers() {
 		case tcell.KeyTab:
 			e.App.SetFocus(e.FileList)
 			return nil
-		case tcell.KeyUp, tcell.KeyDown, tcell.KeyLeft, tcell.KeyRight,
-			tcell.KeyPgUp, tcell.KeyPgDn, tcell.KeyHome, tcell.KeyEnd:
-			// On laisse passer les touches de navigation pour permettre de parcourir le fichier
-			return event
 		}
 
-		// On bloque tout le reste (caractères, Entrée, Backspace, etc.) pour simuler le ReadOnly
-		return nil
+		// Le TextView gère nativement les flèches pour le scroll
+		// On laisse passer les touches par défaut
+		return event
 	})
 }

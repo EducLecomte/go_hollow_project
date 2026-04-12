@@ -7,12 +7,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/EducLecomte/go_hollow_project/internal/utils"
+	"github.com/rivo/tview"
 )
 
 func (e *EditorApp) previewFile(path string) {
 	reader, err := e.FileSystem.Read(path)
 	if err != nil {
-		e.Viewer.SetText(fmt.Sprintf("Erreur lecture: %v", err), false)
+		e.Viewer.SetText(fmt.Sprintf("Erreur lecture: %v", err))
 		return
 	}
 	defer reader.Close()
@@ -22,7 +25,11 @@ func (e *EditorApp) previewFile(path string) {
 	_, _ = io.CopyN(buf, reader, 10000)
 
 	content := strings.ReplaceAll(buf.String(), "\r", "")
-	e.Viewer.SetText(content, false)
+
+	// Application de la coloration syntaxique
+	highlighted := utils.Highlight(content, path)
+	e.Viewer.SetText(tview.TranslateANSI(highlighted))
+	e.Viewer.ScrollToBeginning()
 	e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
 }
 
