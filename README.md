@@ -10,10 +10,12 @@ Ce projet est développé en collaboration avec Gemini Code Assist, dans un but 
 ## Fonctionnalités
 
 - **Explorateur de fichiers intégré** : Navigation fluide dans l'arborescence locale.
-- **Éditeur de texte complet** : Support des fonctionnalités standards d'édition.
+- **Éditeur de texte avec indicateur d'état** : Visualisation en temps réel des modifications non sauvegardées (symbole `*`).
+- **Manipulation de lignes (Nano-style)** : Raccourcis `Ctrl+K` et `Ctrl+U` pour couper et coller des lignes entières.
 - **Système de Fichiers Virtuel (VFS)** : Architecture prête pour le support FTP et Archives.
 - **Presse-papier système** : Copier-coller intégré avec l'OS (X11/Wayland).
 - **Aide contextuelle** : Barre de raccourcis dynamique et documentation interactive via `F1`.
+- **Sauvegarde non-interruptive** : `Ctrl+S` enregistre votre travail sans fermer l'éditeur.
 
 ## Architecture Technique
 
@@ -49,9 +51,9 @@ type VFS interface {
 | `Ctrl + R` | Supprimer le fichier ou dossier sélectionné |
 | `Ctrl + K` | Copier le fichier ou dossier sélectionné |
 | `Ctrl + U` | Coller l'élément dans le dossier actuel |
-| `Ctrl + S` | Sauvegarder le fichier courant |
+| `Ctrl + S` | Sauvegarder le fichier (Éditeur) |
 | `Ctrl + K` | Couper la ligne entière (Éditeur) |
-| `Ctrl + U / V` | Coller/Rétablir la ligne avec décalage (Éditeur) |
+| `Ctrl + U` | Coller la ligne coupée (Éditeur) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier |
 
 ## Installation & Utilisation
@@ -60,6 +62,13 @@ type VFS interface {
 
 - Go 1.18+
 - `xclip`, `xsel` ou `wl-clipboard` (pour le support du presse-papier sur Linux)
+
+### Mise à jour des dépendances
+
+Pour bénéficier des dernières améliorations de l'interface (comme la numérotation des lignes), assurez-vous de mettre à jour `tview` :
+```bash
+go get -u github.com/rivo/tview
+```
 
 ### Lancement
 
@@ -73,13 +82,14 @@ go run .
 - Navigation locale avec gestion des métadonnées (taille).
 - Lecture et écriture réelle sur le disque.
 - Architecture factorisée pour la maintenabilité.
-- Barre de chemin dynamique et interface réactive.
-- Mécanique de "Cut & Paste" de ligne entière avec gestion automatique du décalage (style Nano/Mcedit).
+- Indicateur visuel de modification dans l'éditeur.
+- Mécanique de "Cut & Paste" de ligne (Ctrl+K / Ctrl+U).
 
 ### En cours / À venir
 - [ ] **Client FTP** : Implémentation de `FTPFS` pour l'édition distante.
 - [ ] **Explorateur d'archives** : Support des fichiers `.zip` et `.tar.gz`.
 - [ ] **Recherche avancée** : Logique de recherche textuelle avec surlignage.
+- [ ] **Numérotation des lignes** : Activation après mise à jour de la bibliothèque TUI.
 
 ---
-*Dernière mise à jour : Samedi 11 Avril 2026 - 22:00*
+*Dernière mise à jour : Dimanche 12 Avril 2026 - 11:30*

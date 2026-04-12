@@ -22,6 +22,7 @@ type EditorApp struct {
 	Pages        *tview.Pages
 	FilePath     string
 	CopiedPath   string
+	Clipboard    string
 	CurrentDir   string
 	FileSystem   vfs.VFS
 	CurrentFiles []vfs.FileInfo
