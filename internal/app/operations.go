@@ -1,94 +1,17 @@
 package app
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/EducLecomte/go_hollow_project/internal/vfs"
-	"github.com/rivo/tview"
 )
 
-func (e *EditorApp) previewFile(path string) {
-	reader, err := e.FileSystem.Read(path)
-	if err != nil {
-		e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture: %v", err))
-		return
-	}
-	defer reader.Close()
 
-	buf := new(bytes.Buffer)
-	// On limite la prélecture pour les gros fichiers par performance
-	_, _ = io.CopyN(buf, reader, 10000)
-
-	content := strings.ReplaceAll(buf.String(), "\r", "")
-
-	// Application de la coloration syntaxique
-	highlighted := utils.Highlight(content, path)
-	// tview.TranslateANSI convertit les codes couleurs de chroma pour le TextView
-	e.Viewer.SetText(tview.TranslateANSI(highlighted))
-	e.Viewer.ScrollToBeginning()
-	e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
-}
-
-// previewDirectory affiche une arborescence simplifiée du contenu d'un dossier
-func (e *EditorApp) previewDirectory(path string) {
-	files, err := e.FileSystem.List(path)
-	if err != nil {
-		e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture dossier: %v", err))
-		return
-	}
-
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Contenu de [yellow]%s[white] :\n\n", filepath.Base(path)))
-
-	if len(files) == 0 {
-		sb.WriteString("  [gray](Dossier vide)")
-	} else {
-		for i, f := range files {
-			connector := "├── "
-			if i == len(files)-1 {
-				connector = "└── "
-			}
-			if f.IsDir {
-				sb.WriteString(fmt.Sprintf("%s[darkorange]%s/[white]\n", connector, f.Name))
-			} else {
-				sb.WriteString(fmt.Sprintf("%s%s\n", connector, f.Name))
-			}
-		}
-	}
-
-	e.Viewer.SetText(sb.String())
-	e.Viewer.ScrollToBeginning()
-	e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
-}
-
-func (e *EditorApp) openFile(path string) {
-	reader, err := e.FileSystem.Read(path)
-	if err != nil {
-		e.updateStatus(fmt.Sprintf("[red]Erreur lecture: %v", err))
-		return
-	}
-	defer reader.Close()
-
-	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, reader)
-	if err != nil {
-		e.updateStatus(fmt.Sprintf("[red]Erreur de buffer: %v", err))
-		return
-	}
-
-	content := strings.ReplaceAll(buf.String(), "\r", "")
-	e.FilePath = path
-
-	// On délègue l'affichage à la nouvelle fenêtre d'édition
-	e.showFullEditor(content)
-}
 
 func (e *EditorApp) createFile(name string) {
 	path := filepath.Join(e.CurrentDir, name)

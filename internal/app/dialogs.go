@@ -10,6 +10,20 @@ import (
 	"github.com/rivo/tview"
 )
 
+// showCenteredDialog est un helper pour afficher une primitive centrée sur l'écran
+func (e *EditorApp) showCenteredDialog(pageName string, item tview.Primitive, width, height int) {
+	flex := tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
+			AddItem(nil, 0, 1, false).
+			AddItem(item, height, 1, true).
+			AddItem(nil, 0, 1, false), width, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	e.Pages.AddPage(pageName, flex, true, true)
+	e.App.SetFocus(item)
+}
+
 // showHelp affiche la modale d'aide
 func (e *EditorApp) showHelp() {
 	previousFocus := e.App.GetFocus()
@@ -24,16 +38,7 @@ func (e *EditorApp) showHelp() {
 		SetTitleAlign(tview.AlignCenter).
 		SetBorderPadding(1, 1, 2, 2)
 
-	helpModal := tview.NewFlex().
-		AddItem(nil, 0, 1, false).
-		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
-			AddItem(nil, 0, 1, false).
-			AddItem(helpText, 20, 1, true).
-			AddItem(nil, 0, 1, false), 65, 1, true).
-		AddItem(nil, 0, 1, false)
-
-	e.Pages.AddPage("help", helpModal, true, true)
-	e.App.SetFocus(helpText)
+	e.showCenteredDialog("help", helpText, 65, 20)
 
 	helpText.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyF1 || event.Rune() == 'q' {
@@ -89,16 +94,7 @@ func (e *EditorApp) showNewFileDialog() {
 	inputField := tview.NewInputField().SetLabel(" Nom du nouveau fichier: ")
 	inputField.SetBorder(true).SetTitle(" Nouveau Fichier ").SetTitleAlign(tview.AlignCenter)
 
-	modal := tview.NewFlex().
-		AddItem(nil, 0, 1, false).
-		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
-			AddItem(nil, 0, 1, false).
-			AddItem(inputField, 3, 1, true).
-			AddItem(nil, 0, 1, false), 60, 1, true).
-		AddItem(nil, 0, 1, false)
-
-	e.Pages.AddPage("newfile", modal, true, true)
-	e.App.SetFocus(inputField)
+	e.showCenteredDialog("newfile", inputField, 60, 3)
 
 	inputField.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
@@ -143,16 +139,7 @@ func (e *EditorApp) showNewDirDialog() {
 	inputField := tview.NewInputField().SetLabel(" Nom du nouveau dossier: ")
 	inputField.SetBorder(true).SetTitle(" Nouveau Dossier ").SetTitleAlign(tview.AlignCenter)
 
-	modal := tview.NewFlex().
-		AddItem(nil, 0, 1, false).
-		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
-			AddItem(nil, 0, 1, false).
-			AddItem(inputField, 3, 1, true).
-			AddItem(nil, 0, 1, false), 60, 1, true).
-		AddItem(nil, 0, 1, false)
-
-	e.Pages.AddPage("newdir", modal, true, true)
-	e.App.SetFocus(inputField)
+	e.showCenteredDialog("newdir", inputField, 60, 3)
 
 	inputField.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {

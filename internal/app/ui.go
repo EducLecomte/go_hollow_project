@@ -14,24 +14,28 @@ import (
 )
 
 type EditorApp struct {
-	App          *tview.Application
-	PathBar      *tview.TextView
-	FileList     *tview.List
-	FileSizeBox  *tview.TextView
-	Viewer       *tview.TextView
-	Status       *tview.TextView
-	Pages        *tview.Pages
-	FilePath     string
-	CopiedPath   string
-	Clipboard    string
-	CurrentDir   string
-	FileSystem   vfs.VFS
-	CurrentFiles []vfs.FileInfo
+	// Infrastructure Tview
+	App   *tview.Application
+	Pages *tview.Pages
 
+	// Composants de l'interface principale
+	PathBar     *tview.TextView
+	FileList    *tview.List
+	FileSizeBox *tview.TextView
+	Viewer      *tview.TextView
+	Status      *tview.TextView
+
+	// Système de fichiers et Navigation
+	FileSystem   vfs.VFS
+	CurrentDir   string
+	CurrentFiles []vfs.FileInfo
 	PreviousFS   vfs.VFS
 	PreviousDir  string
 
-	// État de recherche
+	// État de l'éditeur et Presse-papiers
+	FilePath      string
+	CopiedPath    string
+	Clipboard     string
 	LastSearch    string
 	LastSearchPos int
 }
@@ -182,31 +186,6 @@ func (e *EditorApp) setupUI() {
 	e.Pages.AddPage("main", mainFlex, true, true)
 }
 
-func (e *EditorApp) refreshFileList() {
-	e.FileList.Clear()
-	e.FileList.AddItem("..", "Retour au parent", '.', nil)
-
-	files, err := e.FileSystem.List(e.CurrentDir)
-	if err != nil {
-		e.CurrentFiles = nil
-		e.updateStatus(fmt.Sprintf("[red]Erreur listage: %v", err))
-		return
-	}
-
-	e.PathBar.SetText(fmt.Sprintf(" [yellow]Path: [white]%s", e.CurrentDir))
-	e.CurrentFiles = files
-	for _, f := range files {
-		var displayName string
-		if f.IsDir {
-			// Dossier : Orange pour l'identification, lisible sur fond de sélection vert sombre
-			displayName = "[#ff8c00]" + f.Name + "/"
-		} else {
-			// Fichier : Nom simple
-			displayName = f.Name
-		}
-		e.FileList.AddItem(displayName, "", 0, nil)
-	}
-}
 func (e *EditorApp) updateStatus(msg string) {
 	// On s'assure que les messages s'affichent sur une seule ligne
 	e.Status.SetText(fmt.Sprintf("[yellow]%s", msg))

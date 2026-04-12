@@ -186,27 +186,14 @@ func (e *EditorApp) saveFromFullEditor(content string) {
 	}
 }
 
-// showSearchDialog affiche une barre de recherche discrète en bas
+// showSearchDialog affiche une barre de recherche
 func (e *EditorApp) showSearchDialog(textArea *tview.TextArea) {
 	inputField := tview.NewInputField().
 		SetLabel(" Rechercher: ").
 		SetText(e.LastSearch)
-	inputField.SetBorder(true)
+	inputField.SetBorder(true).SetTitle(" Recherche ").SetTitleAlign(tview.AlignCenter)
 
-	// Layout minimaliste pour la barre de recherche
-	searchBar := tview.NewFlex().
-		AddItem(nil, 0, 1, false).
-		AddItem(inputField, 40, 1, true).
-		AddItem(nil, 0, 1, false)
-
-	// On place la barre en bas, juste au dessus du footer
-	searchContainer := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(nil, 0, 1, false).
-		AddItem(searchBar, 3, 1, true).
-		AddItem(nil, 1, 0, false)
-
-	e.Pages.AddPage("search", searchContainer, true, true)
-	e.App.SetFocus(inputField)
+	e.showCenteredDialog("search", inputField, 40, 3)
 
 	inputField.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
