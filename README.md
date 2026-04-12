@@ -4,7 +4,7 @@
 
 **Hollow** est un éditeur de texte TUI (Terminal User Interface) moderne écrit en Go. Il fusionne la simplicité d'utilisation de **Nano** avec la puissance de navigation et de gestion de fichiers distants de **mcedit** (Midnight Commander).
 
-Ce projet est développé en collaboration avec Gemini Code Assist, dans un but récréatif et éducatif.
+Ce projet est développé avec une IA, dans un but récréatif et éducatif.
 
 
 ## Fonctionnalités
@@ -77,7 +77,7 @@ chmod +x install.sh
 - Architecture factorisée pour la maintenabilité.
 - Indicateur visuel de modification dans l'éditeur.
 - Mécanique de "Cut & Paste" de blocs de lignes sans perte du curseur (Ctrl+K / Ctrl+U).
-- [x] **Explorateur d'archives** : Navigation transparente dans les fichiers `.zip`, `.tar` et `.tar.gz`.
+- Explorateur d'archives: Navigation transparente dans les fichiers `.zip`, `.tar` et `.tar.gz`.
 
 ### En cours / À venir
 - [ ] **Client FTP** : Implémentation de `FTPFS` pour l'édition distante.
