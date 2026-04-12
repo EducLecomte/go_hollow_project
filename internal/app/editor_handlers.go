@@ -191,7 +191,6 @@ func (e *EditorApp) showSearchDialog(textArea *tview.TextArea) {
 	inputField := tview.NewInputField().
 		SetLabel(" Rechercher: ").
 		SetText(e.LastSearch)
-	inputField.SetFieldBackgroundColor(tcell.ColorDarkBlue)
 	inputField.SetBorder(true)
 
 	// Layout minimaliste pour la barre de recherche

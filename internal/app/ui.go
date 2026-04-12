@@ -163,8 +163,10 @@ func (e *EditorApp) refreshFileList() {
 	for _, f := range files {
 		var displayName string
 		if f.IsDir {
-			displayName = f.Name + "/"
+			// Dossier : Orange pour l'identification, lisible sur fond de sélection vert sombre
+			displayName = "[#ff8c00]" + f.Name + "/"
 		} else {
+			// Fichier : Nom simple
 			displayName = f.Name
 		}
 		e.FileList.AddItem(displayName, "", 0, nil)
