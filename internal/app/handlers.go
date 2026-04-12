@@ -27,10 +27,10 @@ func (e *EditorApp) setupHandlers() {
 		case tcell.KeyF10:
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
 				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") ||
-				e.Pages.HasPage("delete") {
+				e.Pages.HasPage("delete") || e.Pages.HasPage("ftp") {
 				return event
 			}
-			e.showQuitConfirmation()
+			e.showFTPDialog()
 			return nil
 		case tcell.KeyCtrlC:
 			return nil

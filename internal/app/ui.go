@@ -26,6 +26,9 @@ type EditorApp struct {
 	CurrentDir   string
 	FileSystem   vfs.VFS
 	CurrentFiles []vfs.FileInfo
+
+	PreviousFS   vfs.VFS
+	PreviousDir  string
 }
 
 func NewEditorApp() *EditorApp {

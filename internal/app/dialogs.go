@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
@@ -166,4 +167,29 @@ func (e *EditorApp) showNewDirDialog() {
 			e.App.SetFocus(e.FileList)
 		}
 	})
+}
+
+// showFTPDialog affiche le formulaire de connexion FTP (Stub temporaire)
+func (e *EditorApp) showFTPDialog() {
+	modal := tview.NewModal().
+		SetText("Connexion Distante (FTP) : Fonctionnalité à configurer.").
+		AddButtons([]string{"Fermer"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			e.Pages.RemovePage("ftp")
+			e.App.SetFocus(e.FileList)
+		})
+	e.Pages.AddPage("ftp", modal, true, true)
+}
+
+// showLoadingDialog affiche une modale de chargement avec possibilité d'annuler
+func (e *EditorApp) showLoadingDialog(title string, message string, cancelFunc context.CancelFunc) {
+	modal := tview.NewModal().
+		SetText(message).
+		AddButtons([]string{"Annuler"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			if buttonLabel == "Annuler" && cancelFunc != nil {
+				cancelFunc()
+			}
+		})
+	e.Pages.AddPage("loading", modal, true, true)
 }

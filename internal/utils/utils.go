@@ -1,6 +1,10 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"path/filepath"
+	"strings"
+)
 
 const (
 	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
@@ -40,4 +44,16 @@ func FormatSize(b int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %cB", float64(b)/float64(div), "KMGTPE"[exp])
+}
+
+func IsArchive(name string) bool {
+	ext := strings.ToLower(filepath.Ext(name))
+	if ext == ".zip" || ext == ".tar" || ext == ".gz" || ext == ".tgz" {
+		return true
+	}
+	// Check for double extension like .tar.gz
+	if strings.HasSuffix(strings.ToLower(name), ".tar.gz") {
+		return true
+	}
+	return false
 }
