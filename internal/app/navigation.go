@@ -57,7 +57,13 @@ func (e *EditorApp) handleFileSelection(index int) {
 
 		e.CurrentDir = filepath.Dir(e.CurrentDir)
 		e.refreshFileList()
-		e.updateStatus(utils.HelpMsgFiles)
+		
+		// Mise à jour de la barre d'état selon le contexte
+		if _, ok := e.FileSystem.(*vfs.ArchiveFS); ok {
+			e.updateStatus(utils.HelpMsgArchive)
+		} else {
+			e.updateStatus(utils.HelpMsgFiles)
+		}
 		return
 	}
 
@@ -94,6 +100,7 @@ func (e *EditorApp) handleFileSelection(index int) {
 				e.FileSystem = archiveFS
 				e.CurrentDir = "/"
 				e.refreshFileList()
+				e.updateStatus(utils.HelpMsgArchive) // Aide spécifique aux archives
 				e.updateStatusTemp(fmt.Sprintf("[green]Exploration de l'archive: %s", file.Name))
 			})
 		}()

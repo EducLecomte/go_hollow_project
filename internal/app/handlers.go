@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/EducLecomte/go_hollow_project/internal/utils"
+	"github.com/EducLecomte/go_hollow_project/internal/vfs"
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -25,7 +26,13 @@ func (e *EditorApp) setupHandlers() {
 				e.Pages.HasPage("ftp") {
 				return event
 			}
-			e.showHelp(utils.HelpContentExplorer)
+
+			// Détection du contexte pour l'aide
+			helpContent := utils.HelpContentExplorer
+			if _, ok := e.FileSystem.(*vfs.ArchiveFS); ok {
+				helpContent = utils.HelpContentArchive
+			}
+			e.showHelp(helpContent)
 			return nil
 		case tcell.KeyF10:
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||

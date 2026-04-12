@@ -1,14 +1,28 @@
 package app
 
 import (
+	"github.com/EducLecomte/go_hollow_project/internal/utils"
+	"github.com/EducLecomte/go_hollow_project/internal/vfs"
 	"github.com/gdamore/tcell/v2"
 )
 
 // setupViewerHandlers gère les entrées clavier pour la zone de visualisation (lecture seule)
 func (e *EditorApp) setupViewerHandlers() {
 	e.Viewer.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyTab:
+		key := event.Key()
+
+		// Aide contextuelle F1
+		if key == tcell.KeyF1 {
+			helpContent := utils.HelpContentExplorer
+			if _, ok := e.FileSystem.(*vfs.ArchiveFS); ok {
+				helpContent = utils.HelpContentArchive
+			}
+			e.showHelp(helpContent)
+			return nil
+		}
+
+		// Navigation (Tab ou Ctrl+X) vers l'explorateur
+		if key == tcell.KeyTab || key == tcell.KeyCtrlX {
 			e.App.SetFocus(e.FileList)
 			return nil
 		}

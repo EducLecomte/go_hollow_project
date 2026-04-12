@@ -191,19 +191,6 @@ func (e *EditorApp) setupUI() {
 	e.Viewer.SetWrap(true)    // Rétablit le retour à la ligne automatique
 	e.Viewer.SetDrawFunc(nil) // Supprime la fonction de synchronisation obsolète
 
-	// Capture de F1 et autres touches dans le visualiseur
-	e.Viewer.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyF1 {
-			e.showHelp(utils.HelpContentExplorer)
-			return nil
-		}
-		if event.Key() == tcell.KeyTab {
-			e.App.SetFocus(e.FileList)
-			return nil
-		}
-		return event
-	})
-
 	e.Status.SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
 	e.updateStatus(utils.HelpMsgDefault)
 
@@ -244,7 +231,12 @@ func (e *EditorApp) updateStatusTemp(msg string) {
 			} else if _, ok := focus.(*tview.TextArea); ok {
 				e.updateStatus(utils.HelpMsgEdit)
 			} else {
-				e.updateStatus(utils.HelpMsgFiles)
+				// Détection du contexte pour la barre d'état
+				if _, ok := e.FileSystem.(*vfs.ArchiveFS); ok {
+					e.updateStatus(utils.HelpMsgArchive)
+				} else {
+					e.updateStatus(utils.HelpMsgFiles)
+				}
 			}
 		})
 	}()

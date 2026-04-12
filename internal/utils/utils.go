@@ -9,7 +9,8 @@ import (
 const (
 	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]F10:[white] FTP | [yellow]Ctrl+F/D:[white] Fich/Doss | [yellow]Ctrl+E:[white] Extr | [yellow]Suppr:[white] Suppr | [yellow]Ctrl+X:[white] Quitter"
 	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] C/V | [yellow]Esc:[white] Quitter"
-	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Explorer | [yellow]Flèches/Molette:[white] Défiler"
+	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB/Ctrl+X:[white] Explorer | [yellow]Flèches/Molette:[white] Défiler"
+	HelpMsgArchive = "[yellow]F1:[white] Aide | [yellow]Entrée:[white] Aperçu | [yellow]Ctrl+E:[white] Extraire ficher | [yellow]..:[white] Sortir"
 	HelpMsgFiles   = HelpMsgDefault
 
 	HelpContentExplorer = `
@@ -17,8 +18,8 @@ const (
  --------------------
  F1          : Afficher cette aide
  F10         : Connexion FTP / Distante
- TAB         : Basculer entre l'Explorateur et le Visualiseur
- Ctrl + X    : Quitter l'application
+ TAB / Ctrl+X: Basculer entre l'Explorateur et le Visualiseur
+ Ctrl + X    : Quitter l'application (quand l'Explorateur a le focus)
  Entrée      : Ouvrir un fichier / Entrer dans un dossier
  ..          : Remonter au dossier parent
  
@@ -30,6 +31,19 @@ const (
  Ctrl + E    : Extraire l'archive sélectionnée
  Ctrl + K    : Copier (mémoriser le chemin)
  Ctrl + U    : Coller (copie physique)
+ `
+
+	HelpContentArchive = `
+ [yellow]Exploration d'Archive[white]
+ ----------------------
+ F1          : Afficher cette aide
+ Entrée      : Visualiser un fichier dans l'archive
+ ..          : Remonter dans l'arborescence (ou sortir de l'archive si à la racine)
+ TAB         : Basculer vers le visualiseur
+ 
+ [yellow]Actions Spécifiques[white]
+ --------------------
+ Ctrl + E    : Extraire le fichier ou dossier sélectionné vers le dossier hôte
  `
 
 	HelpContentEditor = `
