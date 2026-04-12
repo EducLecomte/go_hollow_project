@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] Copier/Coller | [yellow]Ctrl+X:[white] Quitter"
 	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Retour | [yellow]Ctrl+K/U:[white] Couper/Coller bloc | [yellow]Flèches:[white] Naviguer"
-	HelpMsgFiles   = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgFiles   = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+R:[white] Suppr. | [yellow]Ctrl+K/U:[white] Copier/Coller | [yellow]Ctrl+X:[white] Quitter"
 
 	HelpContent = `
  [yellow]Navigation & Système[white]

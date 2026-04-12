@@ -13,7 +13,7 @@ Ce projet est développé en collaboration avec Gemini Code Assist, dans un but 
 - **Prévisualisation intelligente** : Coloration syntaxique pour les fichiers (via Chroma) et vue arborescente pour les dossiers.
 - **Éditeur de texte avancé** : Mode plein écran avec indicateur d'état (`*`), support de la coloration et gestion des fins de ligne.
 - **Manipulation de lignes (Nano-style)** : Raccourcis `Ctrl+K` et `Ctrl+U` pour couper et coller des lignes entières.
-- **Système de Fichiers Virtuel (VFS)** : Architecture prête pour le support FTP et Archives.
+- **Système de Fichiers Virtuel (VFS)** : Support natif du système local et des archives (Lecture seule).
 - **Aide contextuelle** : Barre de raccourcis dynamique et documentation interactive via `F1`.
 - **Sauvegarde non-interruptive** : `Ctrl+S` enregistre votre travail sans fermer l'éditeur.
 - **Intégration Shell** : Script d'installation permettant de synchroniser le répertoire de travail du terminal avec celui de l'éditeur à la fermeture.
@@ -77,12 +77,12 @@ chmod +x install.sh
 - Architecture factorisée pour la maintenabilité.
 - Indicateur visuel de modification dans l'éditeur.
 - Mécanique de "Cut & Paste" de blocs de lignes sans perte du curseur (Ctrl+K / Ctrl+U).
+- [x] **Explorateur d'archives** : Navigation transparente dans les fichiers `.zip`, `.tar` et `.tar.gz`.
 
 ### En cours / À venir
 - [ ] **Client FTP** : Implémentation de `FTPFS` pour l'édition distante.
-- [ ] **Explorateur d'archives** : Support des fichiers `.zip` et `.tar.gz`.
 - [ ] **Recherche avancée** : Logique de recherche textuelle avec surlignage.
 - [ ] **Numérotation des lignes** : Activation après mise à jour de la bibliothèque TUI.
 
 ---
-*Dernière mise à jour : Dimanche 12 Avril 2026 - 11:30*
+*Dernière mise à jour : Dimanche 12 Avril 2026 - 12:45*
