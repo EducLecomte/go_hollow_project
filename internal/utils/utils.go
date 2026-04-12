@@ -7,32 +7,45 @@ import (
 )
 
 const (
-	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+E:[white] Extr. | [yellow]Suppr:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
-	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] Couper/Coller | [yellow]Esc:[white] Quitter"
+	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]F10:[white] FTP | [yellow]Ctrl+F/D:[white] Fich/Doss | [yellow]Ctrl+E:[white] Extr | [yellow]Suppr:[white] Suppr | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] C/V | [yellow]Esc:[white] Quitter"
 	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Explorer | [yellow]Flèches/Molette:[white] Défiler"
-	HelpMsgFiles   = "[yellow]F1:[white] Aide | [yellow]TAB:[white] Visualiser | [yellow]Ctrl+F:[white] Fich. | [yellow]Ctrl+D:[white] Doss. | [yellow]Ctrl+E:[white] Extr. | [yellow]Suppr:[white] Suppr. | [yellow]Ctrl+K/U:[white] C/V | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgFiles   = HelpMsgDefault
 
-	HelpContent = `
+	HelpContentExplorer = `
  [yellow]Navigation & Système[white]
  --------------------
  F1          : Afficher cette aide
- F10         : Quitter l'application
+ F10         : Connexion FTP / Distante
  TAB         : Basculer entre l'Explorateur et le Visualiseur
- Ctrl + X    : Quitter l'app (depuis l'explorateur)
- Ctrl + F    : Créer un nouveau fichier (depuis l'explorateur)
- Ctrl + D    : Créer un nouveau dossier (depuis l'explorateur)
- Suppr       : Supprimer un fichier/dossier (depuis l'explorateur)
- Ctrl + E    : Extraire une archive (depuis l'explorateur)
- Ctrl + K    : Copier un fichier/dossier (depuis l'explorateur)
- Ctrl + U    : Coller un fichier/dossier (depuis l'explorateur)
+ Ctrl + X    : Quitter l'application
  Entrée      : Ouvrir un fichier / Entrer dans un dossier
+ ..          : Remonter au dossier parent
+ 
+ [yellow]Opérations Fichiers[white]
+ --------------------
+ Ctrl + F    : Créer un nouveau fichier
+ Ctrl + D    : Créer un nouveau dossier
+ Suppr       : Supprimer l'élément sélectionné
+ Ctrl + E    : Extraire l'archive sélectionnée
+ Ctrl + K    : Copier (mémoriser le chemin)
+ Ctrl + U    : Coller (copie physique)
+ `
 
- [yellow]Édition[white]
- -------
- Ctrl + S    : Sauvegarder le fichier courant
- Ctrl + F    : Rechercher un texte (Entrée pour suivant)
- Ctrl + K    : Couper la ligne (concatène en bloc si répété)
+	HelpContentEditor = `
+ [yellow]Édition de Texte[white]
+ ----------------
+ F1          : Afficher cette aide
+ Ctrl + S    : Sauvegarder les modifications
+ Ctrl + F    : Rechercher (Entrée pour suivant)
+ Ctrl + K    : Couper la ligne (Nano style, concatène si répété)
  Ctrl + U    : Coller le texte ou le bloc coupé
+ Esc / Ctrl+X : Fermer l'éditeur (demande confirmation si modifié)
+ 
+ [yellow]Déplacement[white]
+ -----------
+ Flèches     : Se déplacer dans le texte
+ Page Up/Down: Défilement rapide
  `
 )
 
@@ -57,6 +70,25 @@ func IsArchive(name string) bool {
 	// Check for double extension like .tar.gz
 	if strings.HasSuffix(strings.ToLower(name), ".tar.gz") {
 		return true
+	}
+	return false
+}
+
+// IsBinary détecte si un contenu est binaire en cherchant des octets nuls (null bytes) dans les premiers octets.
+func IsBinary(data []byte) bool {
+	if len(data) == 0 {
+		return false
+	}
+	// On analyse un échantillon du début du fichier
+	limit := 1024
+	if len(data) < limit {
+		limit = len(data)
+	}
+
+	for i := 0; i < limit; i++ {
+		if data[i] == 0 { // Un octet nul est le signe quasi certain d'un fichier binaire
+			return true
+		}
 	}
 	return false
 }

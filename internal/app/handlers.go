@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -24,7 +25,7 @@ func (e *EditorApp) setupHandlers() {
 				e.Pages.HasPage("ftp") {
 				return event
 			}
-			e.showHelp()
+			e.showHelp(utils.HelpContentExplorer)
 			return nil
 		case tcell.KeyF10:
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||

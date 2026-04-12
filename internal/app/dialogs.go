@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -24,11 +23,11 @@ func (e *EditorApp) showCenteredDialog(pageName string, item tview.Primitive, wi
 	e.App.SetFocus(item)
 }
 
-// showHelp affiche une fenêtre modale contenant la liste complète des raccourcis clavier et l'aide utilisateur.
-func (e *EditorApp) showHelp() {
+// showHelp affiche une fenêtre modale contenant la liste des raccourcis adaptée au contexte passé en paramètre.
+func (e *EditorApp) showHelp(content string) {
 	previousFocus := e.App.GetFocus()
 	helpText := tview.NewTextView().
-		SetText(utils.HelpContent).
+		SetText(content).
 		SetDynamicColors(true).
 		SetScrollable(true).
 		SetTextAlign(tview.AlignLeft)
@@ -156,16 +155,57 @@ func (e *EditorApp) showNewDirDialog() {
 	})
 }
 
-// showFTPDialog affiche un message d'information concernant la future fonctionnalité de connexion distante.
+// showFTPDialog affiche le formulaire de connexion pour accéder à un serveur distant via le protocole FTP.
 func (e *EditorApp) showFTPDialog() {
-	modal := tview.NewModal().
-		SetText("Connexion Distante (FTP) : Fonctionnalité à configurer.").
-		AddButtons([]string{"Fermer"}).
-		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			e.Pages.RemovePage("ftp")
-			e.App.SetFocus(e.FileList)
-		})
-	e.Pages.AddPage("ftp", modal, true, true)
+	form := tview.NewForm()
+	form.AddInputField("Hôte", "", 30, nil, nil)
+	form.AddInputField("Port", "21", 6, nil, nil)
+	form.AddInputField("Utilisateur", "anonymous", 30, nil, nil)
+	form.AddPasswordField("Mot de passe", "", 30, '*', nil)
+
+	form.AddButton("Se connecter", func() {
+		host := form.GetFormItem(0).(*tview.InputField).GetText()
+		portStr := form.GetFormItem(1).(*tview.InputField).GetText()
+		user := form.GetFormItem(2).(*tview.InputField).GetText()
+		pass := form.GetFormItem(3).(*tview.InputField).GetText()
+
+		if host == "" {
+			e.updateStatusTemp("[red]L'hôte est obligatoire")
+			return
+		}
+
+		var port int
+		fmt.Sscanf(portStr, "%d", &port)
+		if port == 0 {
+			port = 21
+		}
+
+		e.Pages.RemovePage("ftp")
+
+		// Affichage de la modale de chargement pendant la connexion
+		_, cancel := context.WithCancel(context.Background())
+		e.showLoadingDialog("Chargement", fmt.Sprintf("Connexion à %s...", host), cancel)
+
+		go func() {
+			err := e.connectFTP(host, port, user, pass)
+			e.App.QueueUpdateDraw(func() {
+				e.Pages.RemovePage("loading")
+				if err != nil {
+					e.updateStatusTemp(fmt.Sprintf("[red]Erreur FTP: %v", err))
+				} else {
+					e.updateStatusTemp(fmt.Sprintf("[green]Connecté avec succès à %s", host))
+				}
+			})
+		}()
+	})
+
+	form.AddButton("Annuler", func() {
+		e.Pages.RemovePage("ftp")
+		e.App.SetFocus(e.FileList)
+	})
+
+	form.SetBorder(true).SetTitle(" Connexion FTP ").SetTitleAlign(tview.AlignCenter)
+	e.showCenteredDialog("ftp", form, 50, 15)
 }
 
 // showLoadingDialog affiche une modale d'attente pour les opérations longues avec option d'annulation.
@@ -179,4 +219,18 @@ func (e *EditorApp) showLoadingDialog(title string, message string, cancelFunc c
 			}
 		})
 	e.Pages.AddPage("loading", modal, true, true)
+}
+
+// showBinaryOpenConfirmation affiche un avertissement avant d'ouvrir un fichier détecté comme binaire ou non-textuel.
+func (e *EditorApp) showBinaryOpenConfirmation(path string, onConfirm func()) {
+	modal := tview.NewModal().
+		SetText(fmt.Sprintf("Le fichier %s semble être binaire. L'ouvrir peut causer des instabilités ou un affichage illisible.\n\nVoulez-vous continuer ?", filepath.Base(path))).
+		AddButtons([]string{"Ouvrir", "Annuler"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			if buttonLabel == "Ouvrir" {
+				onConfirm()
+			}
+			e.Pages.RemovePage("binary_confirm")
+		})
+	e.Pages.AddPage("binary_confirm", modal, true, true)
 }

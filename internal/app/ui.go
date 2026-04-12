@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -38,6 +39,9 @@ type EditorApp struct {
 	Clipboard     string
 	LastSearch    string
 	LastSearchPos int
+
+	// Gestion de l'asynchronisme
+	previewCancel context.CancelFunc
 }
 
 // NewEditorApp initialise une nouvelle instance de l'application Hollow.
@@ -84,22 +88,53 @@ func (e *EditorApp) setupUI() {
 
 	// Gestion dynamique de la couleur des dossiers et mise à jour de l'encart d'info
 	isUpdatingList := false
+	// Mise à jour asynchrone du visualiseur pour éviter les blocages (surtout en FTP)
 	e.FileList.SetChangedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
-		// 1. Mise à jour de l'encart d'informations
+		// 1. Annulation de la prévisualisation précédente
+		if e.previewCancel != nil {
+			e.previewCancel()
+		}
+
 		if index == 0 {
 			e.FileSizeBox.SetText("[gray]Parent Directory")
 			e.Viewer.SetText("").SetTitle(" Visualiseur ")
-		} else if index-1 < len(e.CurrentFiles) {
-			file := e.CurrentFiles[index-1]
-			modTimeStr := file.ModTime.Format("2006-01-02 15:04")
-			if file.IsDir {
-				e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", modTimeStr, file.Permissions, file.Owner))
-				e.previewDirectory(filepath.Join(e.CurrentDir, file.Name))
-			} else {
-				e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner))
-				e.previewFile(filepath.Join(e.CurrentDir, file.Name))
-			}
+			return
 		}
+
+		if e.CurrentFiles == nil || index-1 >= len(e.CurrentFiles) {
+			return
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		e.previewCancel = cancel
+
+		file := e.CurrentFiles[index-1]
+		modTimeStr := file.ModTime.Format("2006-01-02 15:04")
+		path := filepath.Join(e.CurrentDir, file.Name)
+
+		// Mise à jour immédiate des infos basiques (synchrone)
+		if file.IsDir {
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", modTimeStr, file.Permissions, file.Owner))
+		} else {
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner))
+		}
+
+		// Prévisualisation asynchrone (E/S et Coloration)
+		go func() {
+			// Petite pause pour éviter de charger inutilement lors d'un défilement rapide
+			time.Sleep(100 * time.Millisecond)
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+
+			if file.IsDir {
+				e.previewDirectory(ctx, path)
+			} else {
+				e.previewFile(ctx, path)
+			}
+		}()
 
 		// 2. Gestion dynamique de la couleur des dossiers pour le contraste
 		if isUpdatingList {
@@ -159,7 +194,7 @@ func (e *EditorApp) setupUI() {
 	// Capture de F1 et autres touches dans le visualiseur
 	e.Viewer.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyF1 {
-			e.showHelp()
+			e.showHelp(utils.HelpContentExplorer)
 			return nil
 		}
 		if event.Key() == tcell.KeyTab {
@@ -213,4 +248,21 @@ func (e *EditorApp) updateStatusTemp(msg string) {
 			}
 		})
 	}()
+}
+
+// connectFTP initialise une connexion à un serveur distant et bascule le système de fichiers de l'application.
+func (e *EditorApp) connectFTP(host string, port int, user, pass string) error {
+	ftpFS, err := vfs.NewFtpFS(host, port, user, pass)
+	if err != nil {
+		return err
+	}
+
+	// Sauvegarde du système actuel pour permettre le retour
+	e.PreviousFS = e.FileSystem
+	e.PreviousDir = e.CurrentDir
+
+	e.FileSystem = ftpFS
+	e.CurrentDir = "/"
+	e.refreshFileList()
+	return nil
 }

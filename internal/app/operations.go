@@ -21,7 +21,7 @@ func (e *EditorApp) createFile(name string) {
 		return
 	}
 	e.refreshFileList()
-	e.openFile(path)
+	e.openFile(path, true)
 	e.updateStatus(fmt.Sprintf("[green]Fichier créé: %s", name))
 }
 

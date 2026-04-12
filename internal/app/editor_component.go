@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -112,7 +113,7 @@ func (e *EditorApp) showFullEditor(content string) {
 			return nil
 		}
 		if key == tcell.KeyF1 {
-			e.showHelp()
+			e.showHelp(utils.HelpContentEditor)
 			return nil
 		}
 		if key == tcell.KeyCtrlS {
@@ -181,7 +182,7 @@ func (e *EditorApp) saveFromFullEditor(content string) {
 		e.updateStatus(fmt.Sprintf("[red]Erreur de sauvegarde: %v", err))
 	} else {
 		e.refreshFileList()
-		e.previewFile(e.FilePath)
+		e.previewFile(context.Background(), e.FilePath)
 		e.updateStatus(fmt.Sprintf("[green]Enregistré: %s", e.FilePath))
 	}
 }

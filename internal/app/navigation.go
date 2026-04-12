@@ -98,61 +98,127 @@ func (e *EditorApp) handleFileSelection(index int) {
 			})
 		}()
 	} else {
-		e.openFile(targetPath)
+		e.openFile(targetPath, false)
 	}
 }
 
-// openFile lit le contenu d'un fichier via le VFS et lance l'interface d'édition plein écran.
-func (e *EditorApp) openFile(path string) {
+// openFile lit le contenu d'un fichier via le VFS de manière asynchrone et lance l'éditeur.
+// Le paramètre force permet de passer outre la détection de fichier binaire.
+func (e *EditorApp) openFile(path string, force bool) {
+	ctx, cancel := context.WithCancel(context.Background())
+	e.showLoadingDialog("Chargement", fmt.Sprintf("Ouverture de %s...", filepath.Base(path)), cancel)
+
+	go func() {
+		reader, err := e.FileSystem.Read(path)
+		if err != nil {
+			e.App.QueueUpdateDraw(func() {
+				e.Pages.RemovePage("loading")
+				e.updateStatus(fmt.Sprintf("[red]Erreur lecture: %v", err))
+			})
+			return
+		}
+		defer reader.Close()
+
+		buf := new(bytes.Buffer)
+		// Lecture par blocs pour permettre l'annulation
+		tempBuf := make([]byte, 32*1024)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			n, err := reader.Read(tempBuf)
+			if n > 0 {
+				buf.Write(tempBuf[:n])
+			}
+
+			// Détection binaire sur le premier bloc lu (si pas forcé)
+			if !force && buf.Len() > 0 && utils.IsBinary(buf.Bytes()) {
+				e.App.QueueUpdateDraw(func() {
+					e.Pages.RemovePage("loading")
+					e.showBinaryOpenConfirmation(path, func() {
+						e.openFile(path, true)
+					})
+				})
+				return
+			}
+
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				e.App.QueueUpdateDraw(func() {
+					e.Pages.RemovePage("loading")
+					e.updateStatus(fmt.Sprintf("[red]Erreur de lecture: %v", err))
+				})
+				return
+			}
+		}
+
+		content := strings.ReplaceAll(buf.String(), "\r", "")
+		e.App.QueueUpdateDraw(func() {
+			e.Pages.RemovePage("loading")
+			e.FilePath = path
+			e.showFullEditor(content)
+		})
+	}()
+}
+
+// previewFile lit les premiers octets d'un fichier de manière asynchrone pour le visualiseur.
+func (e *EditorApp) previewFile(ctx context.Context, path string) {
 	reader, err := e.FileSystem.Read(path)
 	if err != nil {
-		e.updateStatus(fmt.Sprintf("[red]Erreur lecture: %v", err))
+		e.App.QueueUpdateDraw(func() {
+			e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture: %v", err))
+		})
 		return
 	}
 	defer reader.Close()
 
 	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, reader)
-	if err != nil {
-		e.updateStatus(fmt.Sprintf("[red]Erreur de buffer: %v", err))
-		return
-	}
-
-	content := strings.ReplaceAll(buf.String(), "\r", "")
-	e.FilePath = path
-
-	// On délègue l'affichage à la nouvelle fenêtre d'édition
-	e.showFullEditor(content)
-}
-
-// previewFile lit les premiers octets d'un fichier pour en afficher un aperçu colorisé dans le visualiseur.
-func (e *EditorApp) previewFile(path string) {
-	reader, err := e.FileSystem.Read(path)
-	if err != nil {
-		e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture: %v", err))
-		return
-	}
-	defer reader.Close()
-
-	buf := new(bytes.Buffer)
-	// On limite la prélecture pour les gros fichiers par performance
+	// Lecture limitée (10 Ko)
 	_, _ = io.CopyN(buf, reader, 10000)
 
+	select {
+	case <-ctx.Done():
+		return
+	default:
+	}
+
 	content := strings.ReplaceAll(buf.String(), "\r", "")
 
-	// Application de la coloration syntaxique
+	// Détection des fichiers binaires pour éviter les gels ou affichages illisibles
+	if utils.IsBinary(buf.Bytes()) {
+		e.App.QueueUpdateDraw(func() {
+			e.Viewer.SetText("\n\n  [red][ Fichier binaire ou non-éditable - Aperçu désactivé ]")
+			e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
+		})
+		return
+	}
+
 	highlighted := utils.Highlight(content, path)
-	// tview.TranslateANSI convertit les codes couleurs de chroma pour le TextView
-	e.Viewer.SetText(tview.TranslateANSI(highlighted))
-	e.Viewer.ScrollToBeginning()
-	e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
+
+	e.App.QueueUpdateDraw(func() {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+		// On utilise TranslateANSI pour supporter la coloration de Chroma via tview
+		e.Viewer.SetText(tview.TranslateANSI(highlighted))
+		e.Viewer.ScrollToBeginning()
+		e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
+	})
 }
 
-// previewDirectory génère une représentation textuelle arborescente du contenu d'un dossier pour le visualiseur.
-func (e *EditorApp) previewDirectory(path string) {
+// previewDirectory génère une arborescence textuelle de manière asynchrone pour le visualiseur.
+func (e *EditorApp) previewDirectory(ctx context.Context, path string) {
 	files, err := e.FileSystem.List(path)
 	if err != nil {
-		e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture dossier: %v", err))
+		e.App.QueueUpdateDraw(func() {
+			e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture dossier: %v", err))
+		})
 		return
 	}
 
@@ -175,7 +241,14 @@ func (e *EditorApp) previewDirectory(path string) {
 		}
 	}
 
-	e.Viewer.SetText(sb.String())
-	e.Viewer.ScrollToBeginning()
-	e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
+	e.App.QueueUpdateDraw(func() {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+		e.Viewer.SetText(sb.String())
+		e.Viewer.ScrollToBeginning()
+		e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
+	})
 }
