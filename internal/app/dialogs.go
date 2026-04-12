@@ -160,7 +160,7 @@ func (e *EditorApp) showFTPDialog() {
 	form := tview.NewForm()
 	form.AddInputField("Hôte", "", 30, nil, nil)
 	form.AddInputField("Port", "21", 6, nil, nil)
-	form.AddInputField("Utilisateur", "anonymous", 30, nil, nil)
+	form.AddInputField("Utilisateur", "", 30, nil, nil)
 	form.AddPasswordField("Mot de passe", "", 30, '*', nil)
 
 	form.AddButton("Se connecter", func() {
