@@ -17,6 +17,7 @@ func (e *EditorApp) showFullEditor(content string) {
 	textArea := tview.NewTextArea()
 	textArea.SetText(content, false)
 	textArea.SetBorder(true)
+	textArea.SetWrap(false) // Désactive le wrap pour aligner les numéros de ligne
 	textArea.SetSelectedStyle(tcell.StyleDefault.Background(tcell.ColorOrange).Foreground(tcell.ColorBlack))
 
 	// Barre latérale pour les numéros de ligne
