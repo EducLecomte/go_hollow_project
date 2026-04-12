@@ -11,7 +11,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-// showFullEditor affiche l'interface d'édition plein écran
+// showFullEditor initialise et affiche l'interface d'édition avec numérotation des lignes et support des raccourcis de type Nano.
 func (e *EditorApp) showFullEditor(content string) {
 	initialContent := content
 	textArea := tview.NewTextArea()
@@ -142,7 +142,7 @@ func (e *EditorApp) showFullEditor(content string) {
 				for i := 0; i < row; i++ {
 					start += len(lines[i]) + 1
 				}
-				
+
 				end := start + len(lines[row])
 				if row < len(lines)-1 {
 					end += 1 // include the trailing newline
@@ -159,12 +159,12 @@ func (e *EditorApp) showFullEditor(content string) {
 				text := textArea.GetText()
 				lines := strings.Split(text, "\n")
 				row, _, _, _ := textArea.GetCursor()
-				
+
 				start := 0
 				for i := 0; i < row; i++ {
 					start += len(lines[i]) + 1
 				}
-				
+
 				textArea.Replace(start, start, e.Clipboard+"\n")
 			}
 			return nil
@@ -173,7 +173,7 @@ func (e *EditorApp) showFullEditor(content string) {
 	})
 }
 
-// saveFromFullEditor gère la persistance des données depuis le mode édition
+// saveFromFullEditor écrit le contenu actuel de l'éditeur vers le système de fichiers configuré.
 func (e *EditorApp) saveFromFullEditor(content string) {
 	reader := strings.NewReader(content)
 	err := e.FileSystem.Write(e.FilePath, reader)
@@ -186,7 +186,7 @@ func (e *EditorApp) saveFromFullEditor(content string) {
 	}
 }
 
-// showSearchDialog affiche une barre de recherche
+// showSearchDialog affiche une fenêtre de saisie pour rechercher du texte dans le document actuellement ouvert.
 func (e *EditorApp) showSearchDialog(textArea *tview.TextArea) {
 	inputField := tview.NewInputField().
 		SetLabel(" Rechercher: ").
@@ -208,7 +208,7 @@ func (e *EditorApp) showSearchDialog(textArea *tview.TextArea) {
 	})
 }
 
-// findNext cherche l'occurrence suivante d'un terme
+// findNext recherche l'occurrence suivante d'une chaîne, gère la boucle de recherche et centre la vue sur le résultat.
 func (e *EditorApp) findNext(textArea *tview.TextArea, term string) {
 	text := textArea.GetText()
 	if term == "" {
@@ -245,12 +245,12 @@ func (e *EditorApp) findNext(textArea *tview.TextArea, term string) {
 		// On calcule la ligne du match pour SetOffset
 		linesBefore := strings.Split(text[:matchStart], "\n")
 		row := len(linesBefore) - 1
-		
+
 		_, _, _, height := textArea.GetInnerRect()
 		if height <= 0 {
 			height = 20 // Fallback
 		}
-		
+
 		// Centrer le résultat verticalement
 		targetOffset := row - (height / 2)
 		if targetOffset < 0 {

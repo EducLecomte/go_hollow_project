@@ -2,18 +2,18 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"path/filepath"
 	"strings"
-	"context"
 
 	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/EducLecomte/go_hollow_project/internal/vfs"
 	"github.com/rivo/tview"
 )
 
-// refreshFileList met à jour la liste des fichiers du dossier actuel
+// refreshFileList recharge la liste des fichiers du répertoire courant et met à jour l'affichage de l'explorateur.
 func (e *EditorApp) refreshFileList() {
 	e.FileList.Clear()
 	e.FileList.AddItem("..", "Retour au parent", '.', nil)
@@ -40,7 +40,7 @@ func (e *EditorApp) refreshFileList() {
 	}
 }
 
-// handleFileSelection gère l'ouverture des fichiers et la navigation dans les dossiers
+// handleFileSelection traite l'action de validation sur un élément de la liste (navigation, ouverture de fichier ou d'archive).
 func (e *EditorApp) handleFileSelection(index int) {
 	if index == 0 {
 		if e.CurrentDir == "/" || e.CurrentDir == "." || e.CurrentDir == "" {
@@ -77,10 +77,10 @@ func (e *EditorApp) handleFileSelection(index int) {
 
 		go func() {
 			archiveFS, err := vfs.NewArchiveFS(ctx, targetPath)
-			
+
 			e.App.QueueUpdateDraw(func() {
 				e.Pages.RemovePage("loading")
-				
+
 				if err != nil {
 					if err == context.Canceled {
 						e.updateStatusTemp("[yellow]Ouverture annulée.")
@@ -102,7 +102,7 @@ func (e *EditorApp) handleFileSelection(index int) {
 	}
 }
 
-// openFile charge le contenu d'un fichier et ouvre l'éditeur
+// openFile lit le contenu d'un fichier via le VFS et lance l'interface d'édition plein écran.
 func (e *EditorApp) openFile(path string) {
 	reader, err := e.FileSystem.Read(path)
 	if err != nil {
@@ -125,7 +125,7 @@ func (e *EditorApp) openFile(path string) {
 	e.showFullEditor(content)
 }
 
-// previewFile affiche un aperçu du contenu d'un fichier
+// previewFile lit les premiers octets d'un fichier pour en afficher un aperçu colorisé dans le visualiseur.
 func (e *EditorApp) previewFile(path string) {
 	reader, err := e.FileSystem.Read(path)
 	if err != nil {
@@ -148,7 +148,7 @@ func (e *EditorApp) previewFile(path string) {
 	e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
 }
 
-// previewDirectory affiche une arborescence simplifiée du contenu d'un dossier
+// previewDirectory génère une représentation textuelle arborescente du contenu d'un dossier pour le visualiseur.
 func (e *EditorApp) previewDirectory(path string) {
 	files, err := e.FileSystem.List(path)
 	if err != nil {

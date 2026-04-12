@@ -4,6 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// setupHandlers configure les écouteurs d'événements clavier globaux pour l'application.
 func (e *EditorApp) setupHandlers() {
 	// 1. Raccourcis Globaux (Application)
 	e.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {

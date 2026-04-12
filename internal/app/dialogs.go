@@ -10,7 +10,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-// showCenteredDialog est un helper pour afficher une primitive centrée sur l'écran
+// showCenteredDialog est une fonction utilitaire pour positionner n'importe quel composant au centre de l'écran par-dessus l'interface principale.
 func (e *EditorApp) showCenteredDialog(pageName string, item tview.Primitive, width, height int) {
 	flex := tview.NewFlex().
 		AddItem(nil, 0, 1, false).
@@ -24,7 +24,7 @@ func (e *EditorApp) showCenteredDialog(pageName string, item tview.Primitive, wi
 	e.App.SetFocus(item)
 }
 
-// showHelp affiche la modale d'aide
+// showHelp affiche une fenêtre modale contenant la liste complète des raccourcis clavier et l'aide utilisateur.
 func (e *EditorApp) showHelp() {
 	previousFocus := e.App.GetFocus()
 	helpText := tview.NewTextView().
@@ -52,7 +52,7 @@ func (e *EditorApp) showHelp() {
 	})
 }
 
-// showQuitConfirmation affiche la demande de fermeture
+// showQuitConfirmation affiche une boîte de dialogue demandant confirmation avant de quitter définitivement l'application.
 func (e *EditorApp) showQuitConfirmation() {
 	modal := tview.NewModal().
 		SetText("Voulez-vous vraiment quitter Hollow ?").
@@ -67,7 +67,7 @@ func (e *EditorApp) showQuitConfirmation() {
 	e.Pages.AddPage("quit", modal, true, true)
 }
 
-// showDeleteConfirmation affiche la demande de suppression
+// showDeleteConfirmation affiche une confirmation avant de supprimer physiquement un fichier ou un dossier.
 func (e *EditorApp) showDeleteConfirmation() {
 	index := e.FileList.GetCurrentItem()
 	if index <= 0 || index-1 >= len(e.CurrentFiles) {
@@ -89,7 +89,7 @@ func (e *EditorApp) showDeleteConfirmation() {
 	e.Pages.AddPage("delete", modal, true, true)
 }
 
-// showNewFileDialog affiche le formulaire de création de fichier
+// showNewFileDialog affiche une boîte de saisie pour nommer et créer un nouveau fichier dans le dossier courant.
 func (e *EditorApp) showNewFileDialog() {
 	inputField := tview.NewInputField().SetLabel(" Nom du nouveau fichier: ")
 	inputField.SetBorder(true).SetTitle(" Nouveau Fichier ").SetTitleAlign(tview.AlignCenter)
@@ -111,7 +111,7 @@ func (e *EditorApp) showNewFileDialog() {
 	})
 }
 
-// showSaveConfirmation demande si l'on souhaite sauvegarder avant de quitter l'éditeur
+// showSaveConfirmation demande à l'utilisateur s'il souhaite sauvegarder ses modifications avant de fermer l'éditeur plein écran.
 func (e *EditorApp) showSaveConfirmation(content string) {
 	modal := tview.NewModal().
 		SetText("Voulez-vous sauvegarder les modifications avant de quitter ?").
@@ -134,7 +134,7 @@ func (e *EditorApp) showSaveConfirmation(content string) {
 	e.Pages.AddPage("save_confirm", modal, true, true)
 }
 
-// showNewDirDialog affiche le formulaire de création de dossier
+// showNewDirDialog affiche une boîte de saisie pour créer un nouveau répertoire.
 func (e *EditorApp) showNewDirDialog() {
 	inputField := tview.NewInputField().SetLabel(" Nom du nouveau dossier: ")
 	inputField.SetBorder(true).SetTitle(" Nouveau Dossier ").SetTitleAlign(tview.AlignCenter)
@@ -156,7 +156,7 @@ func (e *EditorApp) showNewDirDialog() {
 	})
 }
 
-// showFTPDialog affiche le formulaire de connexion FTP (Stub temporaire)
+// showFTPDialog affiche un message d'information concernant la future fonctionnalité de connexion distante.
 func (e *EditorApp) showFTPDialog() {
 	modal := tview.NewModal().
 		SetText("Connexion Distante (FTP) : Fonctionnalité à configurer.").
@@ -168,7 +168,7 @@ func (e *EditorApp) showFTPDialog() {
 	e.Pages.AddPage("ftp", modal, true, true)
 }
 
-// showLoadingDialog affiche une modale de chargement avec possibilité d'annuler
+// showLoadingDialog affiche une modale d'attente pour les opérations longues avec option d'annulation.
 func (e *EditorApp) showLoadingDialog(title string, message string, cancelFunc context.CancelFunc) {
 	modal := tview.NewModal().
 		SetText(message).

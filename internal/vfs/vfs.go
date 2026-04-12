@@ -37,6 +37,7 @@ type VFS interface {
 // LocalFS implémente VFS pour le système de fichiers local
 type LocalFS struct{}
 
+// List retourne la liste des fichiers et dossiers présents au chemin donné sur le disque local.
 func (l *LocalFS) List(path string) ([]FileInfo, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -72,10 +73,12 @@ func (l *LocalFS) List(path string) ([]FileInfo, error) {
 	return files, nil
 }
 
+// Read ouvre un fichier local en lecture seule.
 func (l *LocalFS) Read(path string) (io.ReadCloser, error) {
 	return os.Open(path)
 }
 
+// Write crée ou écrase un fichier local avec les données fournies par le Reader.
 func (l *LocalFS) Write(path string, data io.Reader) error {
 	f, err := os.Create(path)
 	if err != nil {
@@ -86,10 +89,12 @@ func (l *LocalFS) Write(path string, data io.Reader) error {
 	return err
 }
 
+// Mkdir crée un nouveau répertoire local avec les permissions par défaut (0755).
 func (l *LocalFS) Mkdir(path string) error {
 	return os.Mkdir(path, 0755)
 }
 
+// Copy effectue une copie récursive d'un fichier ou d'un dossier sur le système local.
 func (l *LocalFS) Copy(src, dst string) error {
 	absSrc, err := filepath.Abs(src)
 	if err != nil {
@@ -99,7 +104,7 @@ func (l *LocalFS) Copy(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Empêche la copie d'un répertoire dans lui-même
 	if strings.HasPrefix(absDst, absSrc+string(filepath.Separator)) || absSrc == absDst {
 		return fmt.Errorf("impossible de copier un répertoire dans lui-même ou dans un de ses sous-répertoires")
@@ -142,10 +147,12 @@ func (l *LocalFS) Copy(src, dst string) error {
 	return err
 }
 
+// Remove supprime récursivement un fichier ou un répertoire.
 func (l *LocalFS) Remove(path string) error {
 	return os.RemoveAll(path)
 }
 
+// Stat retourne les métadonnées (taille, droits, propriétaire) d'un fichier ou dossier local.
 func (l *LocalFS) Stat(path string) (FileInfo, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
@@ -170,11 +177,12 @@ func (l *LocalFS) Stat(path string) (FileInfo, error) {
 	}, nil
 }
 
+// Close libère les ressources associées au système de fichiers (non requis pour le local).
 func (l *LocalFS) Close() error {
 	return nil
 }
 
-// CopyRecursiveBetweenVFS permet de copier des données entre deux systèmes de fichiers différents
+// CopyRecursiveBetweenVFS copie récursivement des fichiers ou répertoires entre deux implémentations différentes de VFS.
 func CopyRecursiveBetweenVFS(ctx context.Context, srcFS, dstFS VFS, src, dst string) error {
 	select {
 	case <-ctx.Done():

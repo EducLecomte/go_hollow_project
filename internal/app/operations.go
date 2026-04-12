@@ -11,8 +11,7 @@ import (
 	"github.com/EducLecomte/go_hollow_project/internal/vfs"
 )
 
-
-
+// createFile crée un nouveau fichier vide dans le répertoire courant et l'ouvre dans l'éditeur.
 func (e *EditorApp) createFile(name string) {
 	path := filepath.Join(e.CurrentDir, name)
 	// On écrit un fichier vide
@@ -26,6 +25,7 @@ func (e *EditorApp) createFile(name string) {
 	e.updateStatus(fmt.Sprintf("[green]Fichier créé: %s", name))
 }
 
+// createDir crée un nouveau répertoire dans le répertoire courant.
 func (e *EditorApp) createDir(name string) {
 	path := filepath.Join(e.CurrentDir, name)
 	err := e.FileSystem.Mkdir(path)
@@ -37,11 +37,13 @@ func (e *EditorApp) createDir(name string) {
 	e.updateStatus(fmt.Sprintf("[green]Dossier créé: %s", name))
 }
 
+// prepareCopyFile mémorise le chemin de l'élément à copier pour une action de collage ultérieure.
 func (e *EditorApp) prepareCopyFile(path string) {
 	e.CopiedPath = path
 	e.updateStatusTemp(fmt.Sprintf("Élément prêt à copier: %s", filepath.Base(path)))
 }
 
+// pasteFile copie l'élément précédemment mémorisé dans le répertoire courant, en gérant les doublons de noms.
 func (e *EditorApp) pasteFile() {
 	if e.CopiedPath == "" {
 		e.updateStatusTemp("[red]Rien à coller")
@@ -86,6 +88,7 @@ func (e *EditorApp) pasteFile() {
 	e.updateStatusTemp(fmt.Sprintf("[green]Élément collé: %s", finalName))
 }
 
+// deleteElement supprime définitivement l'élément (fichier ou dossier) situé au chemin indiqué.
 func (e *EditorApp) deleteElement(path string) {
 	err := e.FileSystem.Remove(path)
 	if err != nil {
@@ -96,12 +99,13 @@ func (e *EditorApp) deleteElement(path string) {
 	e.updateStatus(fmt.Sprintf("[green]Supprimé: %s", filepath.Base(path)))
 }
 
-// saveLastDir enregistre le répertoire actuel dans un fichier temporaire pour le shell
+// saveLastDir persiste le chemin du répertoire courant dans un fichier temporaire pour permettre la synchronisation du shell à la fermeture.
 func (e *EditorApp) saveLastDir() {
 	path := fmt.Sprintf("/tmp/hollow_cwd_%s", os.Getenv("USER"))
 	_ = os.WriteFile(path, []byte(e.CurrentDir), 0644)
 }
 
+// extractSelectedArchive gère l'extraction d'une archive complète ou d'un fichier spécifique vers le système de fichiers local.
 func (e *EditorApp) extractSelectedArchive() {
 	index := e.FileList.GetCurrentItem()
 	if index <= 0 || index-1 >= len(e.CurrentFiles) {
@@ -123,7 +127,7 @@ func (e *EditorApp) extractSelectedArchive() {
 		srcFS = e.FileSystem
 		dstFS = e.PreviousFS
 		srcPath = filepath.Join(e.CurrentDir, file.Name)
-		
+
 		hostDir := filepath.Dir(archiveFS.ArchivePath)
 		destName = file.Name
 		destPath = filepath.Join(hostDir, destName)
@@ -135,7 +139,7 @@ func (e *EditorApp) extractSelectedArchive() {
 		}
 
 		archivePath := filepath.Join(e.CurrentDir, file.Name)
-		
+
 		// Calcul du dossier de destination
 		ext := filepath.Ext(file.Name)
 		if strings.HasSuffix(strings.ToLower(file.Name), ".tar.gz") {

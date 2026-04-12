@@ -26,11 +26,12 @@ type ArchiveFS struct {
 	IsGzip      bool
 }
 
+// NewArchiveFS analyse une archive physique et construit une structure de fichiers virtuelle (VFS) en mémoire.
 func NewArchiveFS(ctx context.Context, path string) (*ArchiveFS, error) {
 	fs := &ArchiveFS{
 		ArchivePath: path,
 		Root: &ArchiveNode{
-			Info: FileInfo{Name: "/", IsDir: true},
+			Info:     FileInfo{Name: "/", IsDir: true},
 			Children: make(map[string]*ArchiveNode),
 		},
 	}
@@ -58,6 +59,7 @@ func NewArchiveFS(ctx context.Context, path string) (*ArchiveFS, error) {
 	return fs, nil
 }
 
+// addNode insère récursivement un élément de l'archive dans l'arborescence ArchiveNode.
 func (a *ArchiveFS) addNode(path string, info FileInfo, zipFile *zip.File) {
 	// nettoyage path
 	path = strings.TrimPrefix(path, "/")
@@ -73,9 +75,9 @@ func (a *ArchiveFS) addNode(path string, info FileInfo, zipFile *zip.File) {
 		if part == "" {
 			continue
 		}
-		
+
 		isLast := i == len(parts)-1
-		
+
 		if _, exists := current.Children[part]; !exists {
 			// Si c'est un dossier intermédiaire (qui n'était pas explicite) ou si c'est le dernier élément
 			isDir := true
@@ -84,27 +86,27 @@ func (a *ArchiveFS) addNode(path string, info FileInfo, zipFile *zip.File) {
 			}
 
 			nodeInfo := FileInfo{
-				Name: part,
-				IsDir: isDir,
+				Name:        part,
+				IsDir:       isDir,
 				Permissions: "r--r--r--", // Read Only
-				Owner: "archive",
+				Owner:       "archive",
 			}
-			
+
 			if isLast {
 				nodeInfo.Size = info.Size
 				nodeInfo.ModTime = info.ModTime
 				if info.Permissions != "" {
-				    nodeInfo.Permissions = info.Permissions
+					nodeInfo.Permissions = info.Permissions
 				}
 				nodeInfo.Owner = info.Owner
 			}
 
 			current.Children[part] = &ArchiveNode{
-				Info: nodeInfo,
+				Info:     nodeInfo,
 				Children: make(map[string]*ArchiveNode),
-				ZipFile: nil,
+				ZipFile:  nil,
 			}
-			
+
 			if isLast && zipFile != nil {
 				current.Children[part].ZipFile = zipFile
 			}
@@ -113,6 +115,7 @@ func (a *ArchiveFS) addNode(path string, info FileInfo, zipFile *zip.File) {
 	}
 }
 
+// scanZip parcourt les entrées d'un fichier ZIP pour indexer son contenu dans le VFS.
 func (a *ArchiveFS) scanZip(ctx context.Context) error {
 	r, err := zip.OpenReader(a.ArchivePath)
 	if err != nil {
@@ -126,15 +129,16 @@ func (a *ArchiveFS) scanZip(ctx context.Context) error {
 		default:
 		}
 		a.addNode(f.Name, FileInfo{
-			Name: filepath.Base(f.Name),
-			IsDir: f.FileInfo().IsDir(),
-			Size: f.FileInfo().Size(),
+			Name:    filepath.Base(f.Name),
+			IsDir:   f.FileInfo().IsDir(),
+			Size:    f.FileInfo().Size(),
 			ModTime: f.FileInfo().ModTime(),
 		}, f)
 	}
 	return nil
 }
 
+// scanTar parcourt les entrées d'un fichier TAR (ou TGZ) pour indexer son contenu dans le VFS.
 func (a *ArchiveFS) scanTar(ctx context.Context) error {
 	f, err := os.Open(a.ArchivePath)
 	if err != nil {
@@ -170,17 +174,18 @@ func (a *ArchiveFS) scanTar(ctx context.Context) error {
 		}
 
 		a.addNode(hdr.Name, FileInfo{
-			Name: filepath.Base(hdr.Name),
-			IsDir: hdr.FileInfo().IsDir(),
-			Size: hdr.Size,
-			ModTime: hdr.ModTime,
+			Name:        filepath.Base(hdr.Name),
+			IsDir:       hdr.FileInfo().IsDir(),
+			Size:        hdr.Size,
+			ModTime:     hdr.ModTime,
 			Permissions: hdr.FileInfo().Mode().String(),
-			Owner: hdr.Uname,
+			Owner:       hdr.Uname,
 		}, nil)
 	}
 	return nil
 }
 
+// getNode cherche et retourne un nœud spécifique de l'arborescence virtuelle à partir de son chemin.
 func (a *ArchiveFS) getNode(path string) *ArchiveNode {
 	path = strings.TrimPrefix(path, "/")
 	if path == "" || path == "." {
@@ -201,6 +206,7 @@ func (a *ArchiveFS) getNode(path string) *ArchiveNode {
 	return current
 }
 
+// List retourne la liste des fichiers et dossiers présents dans un répertoire virtuel de l'archive.
 func (a *ArchiveFS) List(path string) ([]FileInfo, error) {
 	node := a.getNode(path)
 	if node == nil || !node.Info.IsDir {
@@ -214,12 +220,14 @@ func (a *ArchiveFS) List(path string) ([]FileInfo, error) {
 	return files, nil
 }
 
+// tarReadCloser encapsule les ressources nécessaires pour la lecture d'un fichier extrait d'un flux TAR.
 type tarReadCloser struct {
 	f   *os.File
 	gzr *gzip.Reader
 	tr  *tar.Reader
 }
 
+// Read implémente io.Reader pour lire le contenu d'un fichier au sein de l'archive TAR.
 func (t *tarReadCloser) Read(p []byte) (n int, err error) {
 	return t.tr.Read(p)
 }
@@ -231,6 +239,7 @@ func (t *tarReadCloser) Close() error {
 	return t.f.Close()
 }
 
+// Read ouvre un flux de lecture pour un fichier spécifique contenu dans l'archive.
 func (a *ArchiveFS) Read(path string) (io.ReadCloser, error) {
 	if a.ZipReader != nil {
 		node := a.getNode(path)
@@ -262,7 +271,7 @@ func (a *ArchiveFS) Read(path string) (io.ReadCloser, error) {
 
 		cleanPath := strings.TrimPrefix(path, "/")
 		cleanPath = strings.TrimPrefix(cleanPath, "./")
-		
+
 		for {
 			hdr, err := tr.Next()
 			if err == io.EOF {
@@ -288,22 +297,27 @@ func (a *ArchiveFS) Read(path string) (io.ReadCloser, error) {
 	return nil, fmt.Errorf("lecture impossible")
 }
 
+// Write renvoie une erreur : les archives sont montées en lecture seule.
 func (a *ArchiveFS) Write(path string, data io.Reader) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
 
+// Mkdir renvoie une erreur : les archives sont montées en lecture seule.
 func (a *ArchiveFS) Mkdir(path string) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
 
+// Copy renvoie une erreur : les archives sont montées en lecture seule.
 func (a *ArchiveFS) Copy(src, dst string) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
 
+// Remove renvoie une erreur : les archives sont montées en lecture seule.
 func (a *ArchiveFS) Remove(path string) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
 
+// Stat retourne les métadonnées d'un fichier ou dossier stocké dans l'archive.
 func (a *ArchiveFS) Stat(path string) (FileInfo, error) {
 	node := a.getNode(path)
 	if node == nil {
@@ -312,6 +326,7 @@ func (a *ArchiveFS) Stat(path string) (FileInfo, error) {
 	return node.Info, nil
 }
 
+// Close libère les descripteurs de fichiers ouverts lors de l'exploration de l'archive.
 func (a *ArchiveFS) Close() error {
 	if a.ZipReader != nil {
 		return a.ZipReader.Close()

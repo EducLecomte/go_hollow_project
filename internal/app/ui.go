@@ -40,8 +40,9 @@ type EditorApp struct {
 	LastSearchPos int
 }
 
+// NewEditorApp initialise une nouvelle instance de l'application Hollow.
+// Par défaut, elle démarre sur le système de fichiers local dans le répertoire courant.
 func NewEditorApp() *EditorApp {
-	// Initialisation par défaut en local
 	localFS := &vfs.LocalFS{}
 	wd, err := filepath.Abs(".")
 	if err != nil {
@@ -66,6 +67,7 @@ func NewEditorApp() *EditorApp {
 	return e
 }
 
+// setupUI configure la disposition des widgets, les styles et les comportements de base de l'interface.
 func (e *EditorApp) setupUI() {
 	e.PathBar.SetDynamicColors(true).
 		SetTextAlign(tview.AlignLeft).
@@ -75,7 +77,7 @@ func (e *EditorApp) setupUI() {
 	e.FileList.ShowSecondaryText(false)
 	e.FileList.SetSelectedBackgroundColor(tcell.ColorWhite).
 		SetSelectedTextColor(tcell.ColorBlack)
-	
+
 	e.FileList.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
 		e.handleFileSelection(index)
 	})
@@ -151,7 +153,7 @@ func (e *EditorApp) setupUI() {
 	e.Viewer.SetBlurFunc(func() {
 		e.Viewer.SetBorderColor(tcell.ColorWhite)
 	})
-	e.Viewer.SetWrap(true) // Rétablit le retour à la ligne automatique
+	e.Viewer.SetWrap(true)    // Rétablit le retour à la ligne automatique
 	e.Viewer.SetDrawFunc(nil) // Supprime la fonction de synchronisation obsolète
 
 	// Capture de F1 et autres touches dans le visualiseur
@@ -186,12 +188,13 @@ func (e *EditorApp) setupUI() {
 	e.Pages.AddPage("main", mainFlex, true, true)
 }
 
+// updateStatus met à jour le texte de la barre d'état en bas de l'écran.
 func (e *EditorApp) updateStatus(msg string) {
 	// On s'assure que les messages s'affichent sur une seule ligne
 	e.Status.SetText(fmt.Sprintf("[yellow]%s", msg))
 }
 
-// updateStatusTemp affiche un message puis restaure les raccourcis après 5 secondes
+// updateStatusTemp affiche un message temporaire dans la barre d'état et le restaure après un délai de 5 secondes.
 func (e *EditorApp) updateStatusTemp(msg string) {
 	e.updateStatus(msg)
 
