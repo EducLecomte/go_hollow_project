@@ -198,8 +198,10 @@ func (e *EditorApp) previewFile(ctx context.Context, path string) {
 	// Détection des fichiers binaires pour éviter les gels ou affichages illisibles
 	if utils.IsBinary(buf.Bytes()) {
 		e.App.QueueUpdateDraw(func() {
-			e.Viewer.SetText("\n\n  [red][ Fichier binaire ou non-éditable - Aperçu désactivé ]")
-			e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", filepath.Base(path)))
+			fileName := filepath.Base(path)
+			fileDesc := utils.GetBinaryFileDescription(fileName)
+			e.Viewer.SetText(fmt.Sprintf("\n\n  [red][ Fichier identifié comme %s - Aperçu désactivé ]", fileDesc))
+			e.Viewer.SetTitle(fmt.Sprintf(" Visualiseur: %s ", fileName))
 		})
 		return
 	}

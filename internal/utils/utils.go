@@ -106,3 +106,38 @@ func IsBinary(data []byte) bool {
 	}
 	return false
 }
+
+// GetBinaryFileDescription renvoie une description amicale du type de fichier basé sur l'extension.
+func GetBinaryFileDescription(filename string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+	switch ext {
+	// Images
+	case ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff", ".svg", ".ico":
+		return "une image"
+	// Archives
+	case ".zip", ".tar", ".gz", ".tgz", ".rar", ".7z", ".xz", ".bz2":
+		return "une archive compressée"
+	// Executables/Librairies
+	case ".exe", ".dll", ".so", ".dylib", ".bin", ".elf", ".out":
+		return "un exécutable ou une bibliothèque système"
+	// Vidéos
+	case ".mp4", ".mkv", ".avi", ".mov", ".flv", ".webm":
+		return "une vidéo"
+	// Audios
+	case ".mp3", ".wav", ".ogg", ".flac", ".aac":
+		return "un fichier audio"
+	// Documents/Base de données
+	case ".pdf":
+		return "un document PDF"
+	case ".epub", ".mobi":
+		return "un livre numérique"
+	case ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".odt", ".ods":
+		return "un document bureautique"
+	case ".sqlite", ".sqlite3", ".db":
+		return "une base de données"
+	case ".iso", ".img":
+		return "une image disque"
+	default:
+		return "un fichier binaire ou non textuel"
+	}
+}

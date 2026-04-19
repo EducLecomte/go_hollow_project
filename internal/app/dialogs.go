@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -224,8 +225,11 @@ func (e *EditorApp) showLoadingDialog(title string, message string, cancelFunc c
 
 // showBinaryOpenConfirmation affiche un avertissement avant d'ouvrir un fichier détecté comme binaire ou non-textuel.
 func (e *EditorApp) showBinaryOpenConfirmation(path string, onConfirm func()) {
+	fileName := filepath.Base(path)
+	fileDescription := utils.GetBinaryFileDescription(fileName)
+	
 	modal := tview.NewModal().
-		SetText(fmt.Sprintf("Le fichier %s semble être binaire. L'ouvrir peut causer des instabilités ou un affichage illisible.\n\nVoulez-vous continuer ?", filepath.Base(path))).
+		SetText(fmt.Sprintf("Le fichier %s semble être %s. L'ouvrir peut causer des instabilités ou un affichage illisible.\n\nVoulez-vous continuer ?", fileName, fileDescription)).
 		AddButtons([]string{"Ouvrir", "Annuler"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			if buttonLabel == "Ouvrir" {
