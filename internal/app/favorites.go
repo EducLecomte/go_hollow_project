@@ -35,14 +35,14 @@ func (e *EditorApp) loadFavorites() {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		e.Favorites = []Favorite{}
-		return
+	} else {
+		var favs []Favorite
+		if err := json.Unmarshal(data, &favs); err != nil {
+			e.Favorites = []Favorite{}
+		} else {
+			e.Favorites = favs
+		}
 	}
-	var favs []Favorite
-	if err := json.Unmarshal(data, &favs); err != nil {
-		e.Favorites = []Favorite{}
-		return
-	}
-	e.Favorites = favs
 
 	// S'assurer que les deux premiers sont Home et Racine
 	homeDir, _ := os.UserHomeDir()
