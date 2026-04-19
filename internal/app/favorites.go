@@ -127,7 +127,13 @@ func (e *EditorApp) refreshFavoritesList() {
 		if i < 9 {
 			shortcut = rune('1' + i)
 		}
-		e.FavList.AddItem(fav.Name, fav.Path, shortcut, nil)
+		
+		displayName := fav.Name
+		if i <= 1 {
+			displayName = "[yellow]" + fav.Name
+		}
+		
+		e.FavList.AddItem(displayName, fav.Path, shortcut, nil)
 	}
 }
 
