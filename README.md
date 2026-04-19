@@ -15,7 +15,7 @@ Ce projet est développé avec une IA, dans un but récréatif et éducatif.
 
 - **Explorateur de fichiers multi-protocoles** : Navigation fluide dans l'arborescence locale et distante (FTP).
 - **Architecture Asynchrone** : Chargement des fichiers et prévisualisations en arrière-plan avec système d'annulation intelligent. L'interface ne "gèle" jamais, même sur des connexions lentes.
-- **Client FTP Intégré** : Connectez-vous à des serveurs distants via `F10` et éditez vos fichiers comme s'ils étaient sur votre disque.
+- **Client FTP Intégré** : Connectez-vous à des serveurs distants via `F3` et éditez vos fichiers comme s'ils étaient sur votre disque.
   !FTP
 - **Sécurité et Robustesse** : Détection automatique des fichiers binaires (images, exécutables) avec avertissements pour éviter les affichages illisibles ou les plantages.
 - **Explorateur d'archives** : Navigation transparente et extraction à la volée du contenu des fichiers `.zip`, `.tar` et `.tar.gz`.
@@ -35,7 +35,7 @@ Le projet repose sur une abstraction puissante du système de fichiers (**VFS**)
 | Touche | Action |
 | :--- | :--- |
 | `F1` | Aide contextuelle (Explorateur/Archive) |
-| `F10` | Ouvrir le dialogue de connexion FTP |
+| `F3` | Ouvrir le dialogue de connexion FTP |
 | `TAB` / `Ctrl + X` | Basculer focus entre l'Explorateur et le Visualiseur |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier / archive |
 | `Ctrl + F` | Créer un nouveau fichier |

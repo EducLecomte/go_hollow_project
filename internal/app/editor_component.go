@@ -117,9 +117,11 @@ func (e *EditorApp) showFullEditor(content string) {
 			return nil
 		}
 		if key == tcell.KeyCtrlS {
-			e.saveFromFullEditor(textArea.GetText())
-			initialContent = textArea.GetText()
-			updateTitle(false)
+			content := textArea.GetText()
+			e.saveFromFullEditor(content, func() {
+				initialContent = content
+				updateTitle(false)
+			})
 			return nil
 		}
 		if key == tcell.KeyCtrlF {
@@ -175,16 +177,29 @@ func (e *EditorApp) showFullEditor(content string) {
 }
 
 // saveFromFullEditor écrit le contenu actuel de l'éditeur vers le système de fichiers configuré.
-func (e *EditorApp) saveFromFullEditor(content string) {
-	reader := strings.NewReader(content)
-	err := e.FileSystem.Write(e.FilePath, reader)
-	if err != nil {
-		e.updateStatus(fmt.Sprintf("[red]Erreur de sauvegarde: %v", err))
-	} else {
-		e.refreshFileList()
-		e.previewFile(context.Background(), e.FilePath)
-		e.updateStatus(fmt.Sprintf("[green]Enregistré: %s", e.FilePath))
-	}
+func (e *EditorApp) saveFromFullEditor(content string, onDone func()) {
+	_, cancel := context.WithCancel(context.Background())
+	e.showLoadingDialog("Sauvegarde", fmt.Sprintf("Enregistrement de %s...", filepath.Base(e.FilePath)), cancel)
+
+	go func() {
+		reader := strings.NewReader(content)
+		err := e.FileSystem.Write(e.FilePath, reader)
+
+		e.App.QueueUpdateDraw(func() {
+			e.Pages.RemovePage("loading")
+			if err != nil {
+				e.updateStatusTemp(fmt.Sprintf("[red]Erreur de sauvegarde: %v", err))
+			} else {
+				e.refreshFileList()
+				// On utilise un nouveau contexte pour la prévisualisation
+				e.previewFile(context.Background(), e.FilePath)
+				e.updateStatusTemp(fmt.Sprintf("[green]Enregistré: %s", filepath.Base(e.FilePath)))
+				if onDone != nil {
+					onDone()
+				}
+			}
+		})
+	}()
 }
 
 // showSearchDialog affiche une fenêtre de saisie pour rechercher du texte dans le document actuellement ouvert.

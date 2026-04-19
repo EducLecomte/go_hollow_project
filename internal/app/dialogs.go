@@ -118,9 +118,10 @@ func (e *EditorApp) showSaveConfirmation(content string) {
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 			switch buttonLabel {
 			case "Sauvegarder":
-				e.saveFromFullEditor(content)
-				e.Pages.RemovePage("edit_screen")
-				e.App.SetFocus(e.FileList)
+				e.saveFromFullEditor(content, func() {
+					e.Pages.RemovePage("edit_screen")
+					e.App.SetFocus(e.FileList)
+				})
 			case "Ignorer":
 				e.Pages.RemovePage("edit_screen")
 				e.App.SetFocus(e.FileList)

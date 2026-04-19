@@ -34,7 +34,7 @@ func (e *EditorApp) setupHandlers() {
 			}
 			e.showHelp(helpContent)
 			return nil
-		case tcell.KeyF10:
+		case tcell.KeyF3:
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
 				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") ||
 				e.Pages.HasPage("delete") || e.Pages.HasPage("ftp") {
