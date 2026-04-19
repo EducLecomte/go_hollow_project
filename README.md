@@ -42,8 +42,9 @@ Le projet repose sur une abstraction puissante du système de fichiers (**VFS**)
 | `Shift + TAB` | Passer au panneau précédent (cycle inverse) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier / archive |
 | `b` | Ajouter / Retirer le dossier courant des favoris |
-| `1-9` | Accès rapide direct aux favoris (quand la barre est ouverte) |
-| `d` / `Suppr` | Supprimer un favori (quand la barre des favoris a le focus) |
+| `Ctrl + P` | Recherche Globale (Fuzzy Finder sur tout le disque) |
+| `1-9` | Accès rapide direct aux favoris (Home & Racine par défaut) |
+| `r` | Renommer le favori sélectionné |
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |
 | `Suppr` | Supprimer l'élément sélectionné dans l'explorateur |

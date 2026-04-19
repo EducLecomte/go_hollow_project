@@ -43,6 +43,35 @@ func (e *EditorApp) loadFavorites() {
 		return
 	}
 	e.Favorites = favs
+
+	// S'assurer que les deux premiers sont Home et Racine
+	homeDir, _ := os.UserHomeDir()
+
+	hasHome := false
+	hasRoot := false
+	if len(e.Favorites) >= 1 && e.Favorites[0].Path == homeDir {
+		hasHome = true
+	}
+	if len(e.Favorites) >= 2 && e.Favorites[1].Path == "/" {
+		hasRoot = true
+	}
+
+	if !hasHome || !hasRoot {
+		// On reconstruit proprement pour que Home soit index 0 et Racine index 1
+		newList := []Favorite{
+			{Name: "Home", Path: homeDir},
+			{Name: "Racine", Path: "/"},
+		}
+		// On ajoute le reste en filtrant les éventuels doublons de Home/Racine s'ils étaient ailleurs
+		for _, f := range e.Favorites {
+			if f.Path != homeDir && f.Path != "/" {
+				newList = append(newList, f)
+			}
+		}
+		e.Favorites = newList
+		e.saveFavorites()
+	}
+
 	e.refreshFavoritesList()
 }
 
@@ -142,6 +171,11 @@ func (e *EditorApp) setupFavHandlers() {
 			return nil
 		case tcell.KeyDelete:
 			index := e.FavList.GetCurrentItem()
+			// Protection des favoris système (0: Home, 1: Racine)
+			if index <= 1 {
+				e.updateStatusTemp("[red]Les favoris système ne peuvent pas être supprimés")
+				return nil
+			}
 			if index >= 0 && index < len(e.Favorites) {
 				e.Favorites = append(e.Favorites[:index], e.Favorites[index+1:]...)
 				e.saveFavorites()
@@ -150,8 +184,23 @@ func (e *EditorApp) setupFavHandlers() {
 			return nil
 		case tcell.KeyRune:
 			r := event.Rune()
+			if r == 'r' {
+				index := e.FavList.GetCurrentItem()
+				if index <= 1 {
+					e.updateStatusTemp("[red]Les favoris système ne peuvent pas être renommés")
+					return nil
+				}
+				if index >= 0 && index < len(e.Favorites) {
+					e.showRenameFavoriteDialog(index)
+				}
+				return nil
+			}
 			if r == 'd' || r == 'b' {
 				index := e.FavList.GetCurrentItem()
+				if index <= 1 {
+					e.updateStatusTemp("[red]Les favoris système ne peuvent pas être supprimés")
+					return nil
+				}
 				if index >= 0 && index < len(e.Favorites) {
 					e.Favorites = append(e.Favorites[:index], e.Favorites[index+1:]...)
 					e.saveFavorites()

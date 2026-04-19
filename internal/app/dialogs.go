@@ -239,3 +239,32 @@ func (e *EditorApp) showBinaryOpenConfirmation(path string, onConfirm func()) {
 		})
 	e.Pages.AddPage("binary_confirm", modal, true, true)
 }
+// showRenameFavoriteDialog affiche une fenêtre de saisie pour donner un nom personnalisé à un favori.
+func (e *EditorApp) showRenameFavoriteDialog(index int) {
+	fav := e.Favorites[index]
+	inputField := tview.NewInputField().
+		SetLabel(" Nouveau nom : ").
+		SetText(fav.Name)
+
+	inputField.SetBorder(true).
+		SetTitle(" Renommer le favori ").
+		SetTitleAlign(tview.AlignCenter)
+
+	e.showCenteredDialog("rename_fav", inputField, 60, 3)
+
+	inputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			newName := inputField.GetText()
+			if newName != "" {
+				e.Favorites[index].Name = newName
+				e.saveFavorites()
+				e.refreshFavoritesList()
+			}
+			e.Pages.RemovePage("rename_fav")
+			e.App.SetFocus(e.FavList)
+		} else if key == tcell.KeyEscape {
+			e.Pages.RemovePage("rename_fav")
+			e.App.SetFocus(e.FavList)
+		}
+	})
+}

@@ -14,6 +14,7 @@ func (e *EditorApp) setupHandlers() {
 			tcell.KeyCtrlS: true, tcell.KeyCtrlF: true, tcell.KeyCtrlD: true,
 			tcell.KeyCtrlK: true, tcell.KeyCtrlU: true, tcell.KeyCtrlB: true,
 			tcell.KeyCtrlV: true, tcell.KeyCtrlX: true, tcell.KeyCtrlE: true,
+			tcell.KeyCtrlP: true,
 			tcell.KeyTab: true, tcell.KeyEnter: true,
 			tcell.KeyBackspace: true, tcell.KeyBackspace2: true,
 		}
@@ -44,6 +45,9 @@ func (e *EditorApp) setupHandlers() {
 			return nil
 		case tcell.KeyCtrlB:
 			e.toggleFavorites()
+			return nil
+		case tcell.KeyCtrlP:
+			e.showFuzzyFinder()
 			return nil
 		case tcell.KeyCtrlC:
 			return nil

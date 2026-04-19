@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]Ctrl+B:[white] Sidebar | [yellow]b:[white] Add/Rem Fav | [yellow]TAB/S-TAB:[white] Cycle | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]Ctrl+P:[white] Finder | [yellow]Ctrl+B:[white] Sidebar | [yellow]b:[white] Fav | [yellow]Ctrl+X:[white] Quitter"
 	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] C/V | [yellow]Esc:[white] Quitter"
 	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB/S-TAB:[white] Cycle | [yellow]Ctrl+X:[white] Quitter | [yellow]Flèches:[white] Défiler"
 	HelpMsgArchive = "[yellow]F1:[white] Aide | [yellow]Entrée:[white] Aperçu | [yellow]Ctrl+E:[white] Extraire | [yellow]..:[white] Sortir"
@@ -20,6 +20,7 @@ const (
  F1          : Afficher cette aide
  TAB         : Passer au panneau suivant (Favoris -> Explorer -> Viewer)
  Shift + TAB : Passer au panneau précédent (cycle inverse)
+ Ctrl + P    : Recherche Globale (Fuzzy Finder sur tout le disque)
  Ctrl + B    : Afficher / Masquer la barre latérale des favoris
  Ctrl + X    : Quitter l'application
  
@@ -38,6 +39,7 @@ const (
  [yellow]Barre des Favoris (Active)[white]
  --------------------------
  1 - 9       : Accès rapide direct au favori par son numéro
+ r           : Renommer le favori sélectionné
  d / Suppr   : Supprimer le favori de la liste
  b           : Retirer le dossier de la liste des favoris
  `
