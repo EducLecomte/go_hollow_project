@@ -16,7 +16,7 @@ import (
 // refreshFileList recharge la liste des fichiers du répertoire courant et met à jour l'affichage de l'explorateur.
 func (e *EditorApp) refreshFileList() {
 	e.FileList.Clear()
-	e.FileList.AddItem("..", "Retour au parent", '.', nil)
+	e.FileList.AddItem("..", "", 0, nil)
 
 	files, err := e.FileSystem.List(e.CurrentDir)
 	if err != nil {

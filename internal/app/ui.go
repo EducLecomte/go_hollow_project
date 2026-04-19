@@ -176,6 +176,10 @@ func (e *EditorApp) setupUI() {
 		}
 	})
 
+	e.FileList.SetBorder(true).SetTitle(" Explorateur ").SetBorderColor(tcell.ColorWhite)
+	e.FileList.SetSelectedBackgroundColor(tcell.ColorWhite).SetSelectedTextColor(tcell.ColorBlack)
+	e.FileList.ShowSecondaryText(false)
+
 	e.FileList.SetFocusFunc(func() {
 		e.FileList.SetBorderColor(tcell.ColorYellow)
 		e.updateStatus(utils.HelpMsgFiles)
@@ -223,7 +227,7 @@ func (e *EditorApp) rebuildMainLayout() {
 	// 1. Zone de navigation (Favoris + Explorateur)
 	navHorizontalFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
 	if e.ShowFavs {
-		navHorizontalFlex.AddItem(e.FavList, 0, 1, false) // Proportion 1
+		navHorizontalFlex.AddItem(e.FavList, 0, 2, false) // Proportion 2
 	}
 	navHorizontalFlex.AddItem(e.FileList, 0, 2, true) // Proportion 2
 
