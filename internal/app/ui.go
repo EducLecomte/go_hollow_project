@@ -218,25 +218,26 @@ func (e *EditorApp) setupUI() {
 	e.rebuildMainLayout()
 }
 
-// rebuildMainLayout reconstruit l'interface principale, permettant de basculer l'affichage des favoris.
+// rebuildMainLayout reconstruit l'interface principale avec des proportions équilibrées.
 func (e *EditorApp) rebuildMainLayout() {
-	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
-
-	// Colonne 1 : Favoris (Conditionnel)
+	// 1. Zone de navigation (Favoris + Explorateur)
+	navHorizontalFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
 	if e.ShowFavs {
-		contentFlex.AddItem(e.FavList, 25, 0, false)
+		navHorizontalFlex.AddItem(e.FavList, 0, 1, false) // Proportion 1
 	}
+	navHorizontalFlex.AddItem(e.FileList, 0, 2, true) // Proportion 2
 
-	// Colonne 2 : Explorateur (Liste + Info)
-	explorerColumn := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(e.FileList, 0, 1, true).
-		AddItem(e.FileSizeBox, 6, 0, false)
+	// 2. Colonne de navigation complète (Nav + Info en bas)
+	navColumn := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(navHorizontalFlex, 0, 1, true).
+		AddItem(e.FileSizeBox, 4, 0, false) // Bloc info plus court (4 lignes)
 
-	contentFlex.AddItem(explorerColumn, 0, 1, true)
+	// 3. Contenu principal (Navigation + Visualiseur)
+	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
+		AddItem(navColumn, 0, 1, true).
+		AddItem(e.Viewer, 0, 2, false) // Le viewer garde une part majoritaire
 
-	// Colonne 3 : Visualiseur
-	contentFlex.AddItem(e.Viewer, 0, 2, false)
-
+	// 4. Layout global (PathBar + Contenu + Status)
 	mainFlex := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(e.PathBar, 1, 0, false).
 		AddItem(contentFlex, 0, 1, true).
