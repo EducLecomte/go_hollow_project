@@ -234,7 +234,7 @@ func (e *EditorApp) rebuildMainLayout() {
 	// 2. Colonne de navigation complète (Nav + Info en bas)
 	navColumn := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(navHorizontalFlex, 0, 1, true).
-		AddItem(e.FileSizeBox, 4, 0, false) // Bloc info plus court (4 lignes)
+		AddItem(e.FileSizeBox, 6, 0, false) // Bloc info (6 lignes pour 4 d'infos + bordure)
 
 	// 3. Contenu principal (Navigation + Visualiseur)
 	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
