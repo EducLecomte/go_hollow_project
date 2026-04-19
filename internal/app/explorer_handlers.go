@@ -22,6 +22,9 @@ func (e *EditorApp) setupExplorerHandlers() {
 		case tcell.KeyCtrlD:
 			e.showNewDirDialog()
 			return nil
+		case tcell.KeyCtrlB:
+			e.showFavoritesDialog()
+			return nil
 		case tcell.KeyCtrlK:
 			index := e.FileList.GetCurrentItem()
 			if index > 0 && index-1 < len(e.CurrentFiles) {

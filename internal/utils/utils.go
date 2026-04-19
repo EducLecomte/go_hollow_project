@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]F3:[white] FTP | [yellow]Ctrl+F/D:[white] Fich/Doss | [yellow]Ctrl+E:[white] Extr | [yellow]Suppr:[white] Suppr | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]F3:[white] FTP | [yellow]Ctrl+B:[white] Favoris | [yellow]Ctrl+F/D:[white] Fich/Doss | [yellow]Ctrl+E:[white] Extr | [yellow]Suppr:[white] Suppr | [yellow]Ctrl+X:[white] Quitter"
 	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] C/V | [yellow]Esc:[white] Quitter"
 	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB/Ctrl+X:[white] Explorer | [yellow]Flèches/Molette:[white] Défiler"
 	HelpMsgArchive = "[yellow]F1:[white] Aide | [yellow]Entrée:[white] Aperçu | [yellow]Ctrl+E:[white] Extraire ficher | [yellow]..:[white] Sortir"
@@ -25,6 +25,7 @@ const (
  
  [yellow]Opérations Fichiers[white]
  --------------------
+ Ctrl + B    : Gérer les dossiers favoris
  Ctrl + F    : Créer un nouveau fichier
  Ctrl + D    : Créer un nouveau dossier
  Suppr       : Supprimer l'élément sélectionné

@@ -12,7 +12,7 @@ func (e *EditorApp) setupHandlers() {
 	e.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		allowedCtrlKeys := map[tcell.Key]bool{
 			tcell.KeyCtrlS: true, tcell.KeyCtrlF: true, tcell.KeyCtrlD: true,
-			tcell.KeyCtrlK: true, tcell.KeyCtrlU: true,
+			tcell.KeyCtrlK: true, tcell.KeyCtrlU: true, tcell.KeyCtrlB: true,
 			tcell.KeyCtrlV: true, tcell.KeyCtrlX: true, tcell.KeyCtrlE: true,
 			tcell.KeyTab: true, tcell.KeyEnter: true,
 			tcell.KeyBackspace: true, tcell.KeyBackspace2: true,

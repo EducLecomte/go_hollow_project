@@ -40,6 +40,9 @@ type EditorApp struct {
 	LastSearch    string
 	LastSearchPos int
 
+	// Dossiers favoris
+	Favorites []Favorite
+
 	// Gestion de l'asynchronisme
 	previewCancel context.CancelFunc
 }
@@ -65,6 +68,7 @@ func NewEditorApp() *EditorApp {
 		FileSystem:  localFS,
 	}
 
+	e.loadFavorites()
 	e.setupUI()
 	e.setupHandlers()
 	e.refreshFileList()
