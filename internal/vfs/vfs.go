@@ -24,13 +24,13 @@ type FileInfo struct {
 
 // VFS est l'interface que devront implémenter tes différents modules
 type VFS interface {
-	List(path string) ([]FileInfo, error)
-	Read(path string) (io.ReadCloser, error)
-	Write(path string, data io.Reader) error
-	Mkdir(path string) error
-	Copy(src, dst string) error
-	Remove(path string) error
-	Stat(path string) (FileInfo, error)
+	List(ctx context.Context, path string) ([]FileInfo, error)
+	Read(ctx context.Context, path string) (io.ReadCloser, error)
+	Write(ctx context.Context, path string, data io.Reader) error
+	Mkdir(ctx context.Context, path string) error
+	Copy(ctx context.Context, src, dst string) error
+	Remove(ctx context.Context, path string) error
+	Stat(ctx context.Context, path string) (FileInfo, error)
 	Close() error
 }
 
@@ -38,7 +38,12 @@ type VFS interface {
 type LocalFS struct{}
 
 // List retourne la liste des fichiers et dossiers présents au chemin donné sur le disque local.
-func (l *LocalFS) List(path string) ([]FileInfo, error) {
+func (l *LocalFS) List(ctx context.Context, path string) ([]FileInfo, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -74,12 +79,22 @@ func (l *LocalFS) List(path string) ([]FileInfo, error) {
 }
 
 // Read ouvre un fichier local en lecture seule.
-func (l *LocalFS) Read(path string) (io.ReadCloser, error) {
+func (l *LocalFS) Read(ctx context.Context, path string) (io.ReadCloser, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
 	return os.Open(path)
 }
 
 // Write crée ou écrase un fichier local avec les données fournies par le Reader.
-func (l *LocalFS) Write(path string, data io.Reader) error {
+func (l *LocalFS) Write(ctx context.Context, path string, data io.Reader) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
 	f, err := os.Create(path)
 	if err != nil {
 		return err
@@ -90,12 +105,12 @@ func (l *LocalFS) Write(path string, data io.Reader) error {
 }
 
 // Mkdir crée un nouveau répertoire local avec les permissions par défaut (0755).
-func (l *LocalFS) Mkdir(path string) error {
+func (l *LocalFS) Mkdir(ctx context.Context, path string) error {
 	return os.Mkdir(path, 0755)
 }
 
 // Copy effectue une copie récursive d'un fichier ou d'un dossier sur le système local.
-func (l *LocalFS) Copy(src, dst string) error {
+func (l *LocalFS) Copy(ctx context.Context, src, dst string) error {
 	absSrc, err := filepath.Abs(src)
 	if err != nil {
 		return err
@@ -124,7 +139,7 @@ func (l *LocalFS) Copy(src, dst string) error {
 			return err
 		}
 		for _, entry := range entries {
-			if err := l.Copy(filepath.Join(src, entry.Name()), filepath.Join(dst, entry.Name())); err != nil {
+			if err := l.Copy(ctx, filepath.Join(src, entry.Name()), filepath.Join(dst, entry.Name())); err != nil {
 				return err
 			}
 		}
@@ -148,12 +163,12 @@ func (l *LocalFS) Copy(src, dst string) error {
 }
 
 // Remove supprime récursivement un fichier ou un répertoire.
-func (l *LocalFS) Remove(path string) error {
+func (l *LocalFS) Remove(ctx context.Context, path string) error {
 	return os.RemoveAll(path)
 }
 
 // Stat retourne les métadonnées (taille, droits, propriétaire) d'un fichier ou dossier local.
-func (l *LocalFS) Stat(path string) (FileInfo, error) {
+func (l *LocalFS) Stat(ctx context.Context, path string) (FileInfo, error) {
 	info, err := os.Lstat(path)
 	if err != nil {
 		return FileInfo{}, err
@@ -190,16 +205,16 @@ func CopyRecursiveBetweenVFS(ctx context.Context, srcFS, dstFS VFS, src, dst str
 	default:
 	}
 
-	info, err := srcFS.Stat(src)
+	info, err := srcFS.Stat(ctx, src)
 	if err != nil {
 		return err
 	}
 
 	if info.IsDir {
-		if err := dstFS.Mkdir(dst); err != nil && !os.IsExist(err) {
+		if err := dstFS.Mkdir(ctx, dst); err != nil && !os.IsExist(err) {
 			return err
 		}
-		entries, err := srcFS.List(src)
+		entries, err := srcFS.List(ctx, src)
 		if err != nil {
 			return err
 		}
@@ -211,11 +226,11 @@ func CopyRecursiveBetweenVFS(ctx context.Context, srcFS, dstFS VFS, src, dst str
 		return nil
 	}
 
-	reader, err := srcFS.Read(src)
+	reader, err := srcFS.Read(ctx, src)
 	if err != nil {
 		return err
 	}
 	defer reader.Close()
 
-	return dstFS.Write(dst, reader)
+	return dstFS.Write(ctx, dst, reader)
 }

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -126,7 +127,7 @@ func (e *EditorApp) scanFiles(dir string, results *[]string) {
 		return
 	}
 
-	files, err := e.FileSystem.List(dir)
+	files, err := e.FileSystem.List(context.Background(), dir)
 	if err != nil {
 		return
 	}

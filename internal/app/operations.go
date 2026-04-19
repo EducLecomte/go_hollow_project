@@ -15,7 +15,7 @@ import (
 func (e *EditorApp) createFile(name string) {
 	path := filepath.Join(e.CurrentDir, name)
 	// On écrit un fichier vide
-	err := e.FileSystem.Write(path, strings.NewReader(""))
+	err := e.FileSystem.Write(context.Background(), path, strings.NewReader(""))
 	if err != nil {
 		e.updateStatus(fmt.Sprintf("[red]Erreur création: %v", err))
 		return
@@ -28,7 +28,7 @@ func (e *EditorApp) createFile(name string) {
 // createDir crée un nouveau répertoire dans le répertoire courant.
 func (e *EditorApp) createDir(name string) {
 	path := filepath.Join(e.CurrentDir, name)
-	err := e.FileSystem.Mkdir(path)
+	err := e.FileSystem.Mkdir(context.Background(), path)
 	if err != nil {
 		e.updateStatus(fmt.Sprintf("[red]Erreur dossier: %v", err))
 		return
@@ -78,7 +78,7 @@ func (e *EditorApp) pasteFile() {
 
 	dst := filepath.Join(e.CurrentDir, finalName)
 
-	err := e.FileSystem.Copy(e.CopiedPath, dst)
+	err := e.FileSystem.Copy(context.Background(), e.CopiedPath, dst)
 	if err != nil {
 		e.updateStatusTemp(fmt.Sprintf("[red]Erreur collage: %v", err))
 		return
@@ -90,7 +90,7 @@ func (e *EditorApp) pasteFile() {
 
 // deleteElement supprime définitivement l'élément (fichier ou dossier) situé au chemin indiqué.
 func (e *EditorApp) deleteElement(path string) {
-	err := e.FileSystem.Remove(path)
+	err := e.FileSystem.Remove(context.Background(), path)
 	if err != nil {
 		e.updateStatus(fmt.Sprintf("[red]Erreur suppression: %v", err))
 		return

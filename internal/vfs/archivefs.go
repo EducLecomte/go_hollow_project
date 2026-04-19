@@ -207,7 +207,12 @@ func (a *ArchiveFS) getNode(path string) *ArchiveNode {
 }
 
 // List retourne la liste des fichiers et dossiers présents dans un répertoire virtuel de l'archive.
-func (a *ArchiveFS) List(path string) ([]FileInfo, error) {
+func (a *ArchiveFS) List(ctx context.Context, path string) ([]FileInfo, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
 	node := a.getNode(path)
 	if node == nil || !node.Info.IsDir {
 		return nil, fmt.Errorf("dossier non trouvé")
@@ -240,7 +245,12 @@ func (t *tarReadCloser) Close() error {
 }
 
 // Read ouvre un flux de lecture pour un fichier spécifique contenu dans l'archive.
-func (a *ArchiveFS) Read(path string) (io.ReadCloser, error) {
+func (a *ArchiveFS) Read(ctx context.Context, path string) (io.ReadCloser, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
 	if a.ZipReader != nil {
 		node := a.getNode(path)
 		if node != nil && node.ZipFile != nil {
@@ -298,27 +308,32 @@ func (a *ArchiveFS) Read(path string) (io.ReadCloser, error) {
 }
 
 // Write renvoie une erreur : les archives sont montées en lecture seule.
-func (a *ArchiveFS) Write(path string, data io.Reader) error {
+func (a *ArchiveFS) Write(ctx context.Context, path string, data io.Reader) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
 
 // Mkdir renvoie une erreur : les archives sont montées en lecture seule.
-func (a *ArchiveFS) Mkdir(path string) error {
+func (a *ArchiveFS) Mkdir(ctx context.Context, path string) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
 
 // Copy renvoie une erreur : les archives sont montées en lecture seule.
-func (a *ArchiveFS) Copy(src, dst string) error {
+func (a *ArchiveFS) Copy(ctx context.Context, src, dst string) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
 
 // Remove renvoie une erreur : les archives sont montées en lecture seule.
-func (a *ArchiveFS) Remove(path string) error {
+func (a *ArchiveFS) Remove(ctx context.Context, path string) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }
 
 // Stat retourne les métadonnées d'un fichier ou dossier stocké dans l'archive.
-func (a *ArchiveFS) Stat(path string) (FileInfo, error) {
+func (a *ArchiveFS) Stat(ctx context.Context, path string) (FileInfo, error) {
+	select {
+	case <-ctx.Done():
+		return FileInfo{}, ctx.Err()
+	default:
+	}
 	node := a.getNode(path)
 	if node == nil {
 		return FileInfo{}, fmt.Errorf("fichier non trouvé")

@@ -14,7 +14,7 @@ Ce projet est développé avec une IA, dans un but récréatif et éducatif.
 ## Fonctionnalités Clés
 
 - **Explorateur de fichiers multi-protocoles** : Navigation fluide dans l'arborescence locale et distante (FTP).
-- **Architecture Asynchrone** : Chargement des fichiers et prévisualisations en arrière-plan avec système d'annulation intelligent. L'interface ne "gèle" jamais, même sur des connexions lentes.
+- **Architecture Asynchrone** : Chargement des fichiers et prévisualisations en arrière-plan avec système d'annulation intelligent (Context). L'interface ne "gèle" jamais, même sur des connexions réseaux (FTP) lentes, et les opérations longues peuvent être interrompues instantanément.
 - **Client FTP Intégré** : Connectez-vous à des serveurs distants via `F3` et éditez vos fichiers comme s'ils étaient sur votre disque.
   !FTP
 - **Sécurité et Robustesse** : Détection automatique des fichiers binaires (images, exécutables) avec avertissements pour éviter les affichages illisibles ou les plantages.
@@ -81,4 +81,4 @@ chmod +x install.sh
 ```
 
 ---
-*Dernière mise à jour majeure : Dimanche 12 Avril 2026 - 17:35*
+*Dernière mise à jour majeure : Dimanche 19 Avril 2026 - 20:08*

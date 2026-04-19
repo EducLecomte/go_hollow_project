@@ -178,27 +178,29 @@ func (e *EditorApp) showFullEditor(content string) {
 
 // saveFromFullEditor écrit le contenu actuel de l'éditeur vers le système de fichiers configuré.
 func (e *EditorApp) saveFromFullEditor(content string, onDone func()) {
-	_, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	e.showLoadingDialog("Sauvegarde", fmt.Sprintf("Enregistrement de %s...", filepath.Base(e.FilePath)), cancel)
 
 	go func() {
 		reader := strings.NewReader(content)
-		err := e.FileSystem.Write(e.FilePath, reader)
+		err := e.FileSystem.Write(ctx, e.FilePath, reader)
 
 		e.App.QueueUpdateDraw(func() {
 			e.Pages.RemovePage("loading")
 			if err != nil {
 				e.updateStatusTemp(fmt.Sprintf("[red]Erreur de sauvegarde: %v", err))
 			} else {
-				e.refreshFileList()
-				// On utilise un nouveau contexte pour la prévisualisation
-				e.previewFile(context.Background(), e.FilePath)
 				e.updateStatusTemp(fmt.Sprintf("[green]Enregistré: %s", filepath.Base(e.FilePath)))
-				if onDone != nil {
-					onDone()
-				}
 			}
 		})
+
+		if err == nil {
+			e.refreshFileList()
+			e.previewFile(context.Background(), e.FilePath)
+			if onDone != nil {
+				e.App.QueueUpdateDraw(onDone)
+			}
+		}
 	}()
 }
 

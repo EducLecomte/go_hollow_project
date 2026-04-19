@@ -15,29 +15,32 @@ import (
 
 // refreshFileList recharge la liste des fichiers du répertoire courant et met à jour l'affichage de l'explorateur.
 func (e *EditorApp) refreshFileList() {
-	e.FileList.Clear()
-	e.FileList.AddItem("..", "", 0, nil)
+	go func() {
+		files, err := e.FileSystem.List(context.Background(), e.CurrentDir)
 
-	files, err := e.FileSystem.List(e.CurrentDir)
-	if err != nil {
-		e.CurrentFiles = nil
-		e.updateStatus(fmt.Sprintf("[red]Erreur listage: %v", err))
-		return
-	}
+		e.App.QueueUpdateDraw(func() {
+			e.FileList.Clear()
+			e.FileList.AddItem("..", "", 0, nil)
 
-	e.PathBar.SetText(fmt.Sprintf(" Path: %s", utils.ShortenPath(e.CurrentDir)))
-	e.CurrentFiles = files
-	for _, f := range files {
-		var displayName string
-		if f.IsDir {
-			// Dossier : Orange pour l'identification
-			displayName = "[#ff8c00]" + f.Name + "/"
-		} else {
-			// Fichier : Nom simple
-			displayName = f.Name
-		}
-		e.FileList.AddItem(displayName, "", 0, nil)
-	}
+			if err != nil {
+				e.CurrentFiles = nil
+				e.updateStatus(fmt.Sprintf("[red]Erreur listage: %v", err))
+				return
+			}
+
+			e.PathBar.SetText(fmt.Sprintf(" Path: %s", utils.ShortenPath(e.CurrentDir)))
+			e.CurrentFiles = files
+			for _, f := range files {
+				var displayName string
+				if f.IsDir {
+					displayName = "[#ff8c00]" + f.Name + "/"
+				} else {
+					displayName = f.Name
+				}
+				e.FileList.AddItem(displayName, "", 0, nil)
+			}
+		})
+	}()
 }
 
 // handleFileSelection traite l'action de validation sur un élément de la liste (navigation, ouverture de fichier ou d'archive).
@@ -116,7 +119,7 @@ func (e *EditorApp) openFile(path string, force bool) {
 	e.showLoadingDialog("Chargement", fmt.Sprintf("Ouverture de %s...", filepath.Base(path)), cancel)
 
 	go func() {
-		reader, err := e.FileSystem.Read(path)
+		reader, err := e.FileSystem.Read(ctx, path)
 		if err != nil {
 			e.App.QueueUpdateDraw(func() {
 				e.Pages.RemovePage("loading")
@@ -174,7 +177,7 @@ func (e *EditorApp) openFile(path string, force bool) {
 
 // previewFile lit les premiers octets d'un fichier de manière asynchrone pour le visualiseur.
 func (e *EditorApp) previewFile(ctx context.Context, path string) {
-	reader, err := e.FileSystem.Read(path)
+	reader, err := e.FileSystem.Read(ctx, path)
 	if err != nil {
 		e.App.QueueUpdateDraw(func() {
 			e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture: %v", err))
@@ -223,7 +226,7 @@ func (e *EditorApp) previewFile(ctx context.Context, path string) {
 
 // previewDirectory génère une arborescence textuelle de manière asynchrone pour le visualiseur.
 func (e *EditorApp) previewDirectory(ctx context.Context, path string) {
-	files, err := e.FileSystem.List(path)
+	files, err := e.FileSystem.List(ctx, path)
 	if err != nil {
 		e.App.QueueUpdateDraw(func() {
 			e.Viewer.SetText(fmt.Sprintf("[red]Erreur lecture dossier: %v", err))

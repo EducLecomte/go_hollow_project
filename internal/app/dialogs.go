@@ -219,6 +219,7 @@ func (e *EditorApp) showLoadingDialog(title string, message string, cancelFunc c
 			if buttonLabel == "Annuler" && cancelFunc != nil {
 				cancelFunc()
 			}
+			e.Pages.RemovePage("loading")
 		})
 	e.Pages.AddPage("loading", modal, true, true)
 }

@@ -289,6 +289,13 @@ func (e *EditorApp) connectFTP(host string, port int, user, pass string) error {
 		return err
 	}
 
+	// Configuration du callback de statut pour les reconnexions
+	ftpFS.OnStatus = func(msg string) {
+		e.App.QueueUpdateDraw(func() {
+			e.updateStatusTemp(msg)
+		})
+	}
+
 	// Sauvegarde du système actuel pour permettre le retour
 	e.PreviousFS = e.FileSystem
 	e.PreviousDir = e.CurrentDir
