@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -148,4 +149,17 @@ func GetBinaryFileDescription(filename string) string {
 	default:
 		return "un fichier binaire ou non textuel"
 	}
+}
+
+// ShortenPath remplace le chemin du répertoire utilisateur par ~ si applicable.
+func ShortenPath(path string) string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return path
+	}
+
+	if strings.HasPrefix(path, home) {
+		return "~" + strings.TrimPrefix(path, home)
+	}
+	return path
 }

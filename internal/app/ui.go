@@ -220,20 +220,22 @@ func (e *EditorApp) setupUI() {
 
 // rebuildMainLayout reconstruit l'interface principale, permettant de basculer l'affichage des favoris.
 func (e *EditorApp) rebuildMainLayout() {
-	// Zone de gauche : Favoris + Explorateur en haut, Info en bas
-	leftSideTop := tview.NewFlex().SetDirection(tview.FlexColumn)
+	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn)
+
+	// Colonne 1 : Favoris (Conditionnel)
 	if e.ShowFavs {
-		leftSideTop.AddItem(e.FavList, 25, 0, false)
+		contentFlex.AddItem(e.FavList, 25, 0, false)
 	}
-	leftSideTop.AddItem(e.FileList, 0, 1, true)
 
-	leftSide := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(leftSideTop, 0, 1, true).
-		AddItem(e.FileSizeBox, 5, 0, false) // Réduit à 5 lignes pour gagner un peu de place
+	// Colonne 2 : Explorateur (Liste + Info)
+	explorerColumn := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(e.FileList, 0, 1, true).
+		AddItem(e.FileSizeBox, 6, 0, false)
 
-	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
-		AddItem(leftSide, 0, 1, true).
-		AddItem(e.Viewer, 0, 2, false)
+	contentFlex.AddItem(explorerColumn, 0, 1, true)
+
+	// Colonne 3 : Visualiseur
+	contentFlex.AddItem(e.Viewer, 0, 2, false)
 
 	mainFlex := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(e.PathBar, 1, 0, false).

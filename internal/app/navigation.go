@@ -25,7 +25,7 @@ func (e *EditorApp) refreshFileList() {
 		return
 	}
 
-	e.PathBar.SetText(fmt.Sprintf(" Path: %s", e.CurrentDir))
+	e.PathBar.SetText(fmt.Sprintf(" Path: %s", utils.ShortenPath(e.CurrentDir)))
 	e.CurrentFiles = files
 	for _, f := range files {
 		var displayName string

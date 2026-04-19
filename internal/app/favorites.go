@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -105,7 +106,7 @@ func (e *EditorApp) refreshFavoritesList() {
 func (e *EditorApp) setupFavHandlers() {
 	e.FavList.SetChangedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
 		if index >= 0 && index < len(e.Favorites) {
-			e.FileSizeBox.SetText("[yellow]Favori : [white]" + e.Favorites[index].Path)
+			e.FileSizeBox.SetText("[yellow]Favori : [white]" + utils.ShortenPath(e.Favorites[index].Path))
 		}
 	})
 
