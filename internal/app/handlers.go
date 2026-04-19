@@ -42,6 +42,9 @@ func (e *EditorApp) setupHandlers() {
 			}
 			e.showFTPDialog()
 			return nil
+		case tcell.KeyCtrlB:
+			e.toggleFavorites()
+			return nil
 		case tcell.KeyCtrlC:
 			return nil
 		}

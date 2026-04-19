@@ -25,6 +25,7 @@ type EditorApp struct {
 	FileSizeBox *tview.TextView
 	Viewer      *tview.TextView
 	Status      *tview.TextView
+	FavList     *tview.List // Barre latérale des favoris
 
 	// Système de fichiers et Navigation
 	FileSystem   vfs.VFS
@@ -42,6 +43,7 @@ type EditorApp struct {
 
 	// Dossiers favoris
 	Favorites []Favorite
+	ShowFavs  bool
 
 	// Gestion de l'asynchronisme
 	previewCancel context.CancelFunc
@@ -63,6 +65,7 @@ func NewEditorApp() *EditorApp {
 		FileSizeBox: tview.NewTextView(),
 		Viewer:      tview.NewTextView(),
 		Status:      tview.NewTextView(),
+		FavList:     tview.NewList(),
 		Pages:       tview.NewPages(),
 		CurrentDir:  wd,
 		FileSystem:  localFS,
@@ -70,6 +73,7 @@ func NewEditorApp() *EditorApp {
 
 	e.loadFavorites()
 	e.setupUI()
+	e.setupFavHandlers()
 	e.setupHandlers()
 	e.refreshFileList()
 	return e
@@ -199,17 +203,41 @@ func (e *EditorApp) setupUI() {
 	e.Status.SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
 	e.updateStatus(utils.HelpMsgDefault)
 
-	// Layout de la colonne de gauche (Explorateur + Info taille)
-	leftColumn := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(e.FileList, 0, 1, true).
-		AddItem(e.FileSizeBox, 6, 0, false)
+	// Barre latérale des favoris
+	e.FavList.SetBorder(true).SetTitle(" Favoris ").SetBorderColor(tcell.ColorWhite)
+	e.FavList.SetSelectedBackgroundColor(tcell.ColorWhite).SetSelectedTextColor(tcell.ColorBlack)
+	e.FavList.ShowSecondaryText(false)
+	e.FavList.SetFocusFunc(func() {
+		e.FavList.SetBorderColor(tcell.ColorYellow)
+	})
+	e.FavList.SetBlurFunc(func() {
+		e.FavList.SetBorderColor(tcell.ColorWhite)
+	})
 
-	// Layout
+	// Layout principal avec Support de la barre latérale
+	e.rebuildMainLayout()
+}
+
+// rebuildMainLayout reconstruit l'interface principale, permettant de basculer l'affichage des favoris.
+func (e *EditorApp) rebuildMainLayout() {
+	// Zone de gauche : Favoris + Explorateur en haut, Info en bas
+	leftSideTop := tview.NewFlex().SetDirection(tview.FlexColumn)
+	if e.ShowFavs {
+		leftSideTop.AddItem(e.FavList, 25, 0, false)
+	}
+	leftSideTop.AddItem(e.FileList, 0, 1, true)
+
+	leftSide := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(leftSideTop, 0, 1, true).
+		AddItem(e.FileSizeBox, 5, 0, false) // Réduit à 5 lignes pour gagner un peu de place
+
+	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn).
+		AddItem(leftSide, 0, 1, true).
+		AddItem(e.Viewer, 0, 2, false)
+
 	mainFlex := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(e.PathBar, 1, 0, false).
-		AddItem(tview.NewFlex().
-			AddItem(leftColumn, 0, 1, true).
-			AddItem(e.Viewer, 0, 2, false), 0, 1, true).
+		AddItem(contentFlex, 0, 1, true).
 		AddItem(e.Status, 1, 0, false)
 
 	e.Pages.AddPage("main", mainFlex, true, true)

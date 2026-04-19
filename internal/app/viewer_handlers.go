@@ -21,9 +21,21 @@ func (e *EditorApp) setupViewerHandlers() {
 			return nil
 		}
 
-		// Navigation (Tab ou Ctrl+X) vers l'explorateur
-		if key == tcell.KeyTab || key == tcell.KeyCtrlX {
+		// Navigation (Tab ou Ctrl+X) vers l'explorateur ou les favoris
+		if key == tcell.KeyTab {
+			if e.ShowFavs {
+				e.App.SetFocus(e.FavList)
+			} else {
+				e.App.SetFocus(e.FileList)
+			}
+			return nil
+		}
+		if key == tcell.KeyBacktab {
 			e.App.SetFocus(e.FileList)
+			return nil
+		}
+		if key == tcell.KeyCtrlX {
+			e.showQuitConfirmation()
 			return nil
 		}
 

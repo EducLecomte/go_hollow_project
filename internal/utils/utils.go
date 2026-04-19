@@ -7,31 +7,38 @@ import (
 )
 
 const (
-	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]F3:[white] FTP | [yellow]Ctrl+B:[white] Favoris | [yellow]Ctrl+F/D:[white] Fich/Doss | [yellow]Ctrl+E:[white] Extr | [yellow]Suppr:[white] Suppr | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]Ctrl+B:[white] Sidebar | [yellow]b:[white] Add/Rem Fav | [yellow]TAB/S-TAB:[white] Cycle | [yellow]Ctrl+X:[white] Quitter"
 	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] C/V | [yellow]Esc:[white] Quitter"
-	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB/Ctrl+X:[white] Explorer | [yellow]Flèches/Molette:[white] Défiler"
-	HelpMsgArchive = "[yellow]F1:[white] Aide | [yellow]Entrée:[white] Aperçu | [yellow]Ctrl+E:[white] Extraire ficher | [yellow]..:[white] Sortir"
+	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB/S-TAB:[white] Cycle | [yellow]Ctrl+X:[white] Quitter | [yellow]Flèches:[white] Défiler"
+	HelpMsgArchive = "[yellow]F1:[white] Aide | [yellow]Entrée:[white] Aperçu | [yellow]Ctrl+E:[white] Extraire | [yellow]..:[white] Sortir"
 	HelpMsgFiles   = HelpMsgDefault
 
 	HelpContentExplorer = `
- [yellow]Navigation & Système[white]
- --------------------
+ [yellow]Navigation & Panneaux[white]
+ ----------------------
  F1          : Afficher cette aide
- F3          : Connexion FTP / Distante
- TAB / Ctrl+X: Basculer entre l'Explorateur et le Visualiseur
- Ctrl + X    : Quitter l'application (quand l'Explorateur a le focus)
+ TAB         : Passer au panneau suivant (Favoris -> Explorer -> Viewer)
+ Shift + TAB : Passer au panneau précédent (cycle inverse)
+ Ctrl + B    : Afficher / Masquer la barre latérale des favoris
+ Ctrl + X    : Quitter l'application
+ 
+ [yellow]Explorateur & Fichiers[white]
+ ----------------------
  Entrée      : Ouvrir un fichier / Entrer dans un dossier
  ..          : Remonter au dossier parent
- 
- [yellow]Opérations Fichiers[white]
- --------------------
- Ctrl + B    : Gérer les dossiers favoris
+ b           : Ajouter / Retirer le dossier courant des favoris
  Ctrl + F    : Créer un nouveau fichier
  Ctrl + D    : Créer un nouveau dossier
  Suppr       : Supprimer l'élément sélectionné
- Ctrl + E    : Extraire l'archive sélectionnée
- Ctrl + K    : Copier (mémoriser le chemin)
- Ctrl + U    : Coller (copie physique)
+ Ctrl + E    : Extraire l'archive (zip, tar.gz...)
+ Ctrl + K/U  : Copier / Coller (mémorisation de chemin)
+ F3          : Connexion FTP / Distante
+ 
+ [yellow]Barre des Favoris (Active)[white]
+ --------------------------
+ 1 - 9       : Accès rapide direct au favori par son numéro
+ d / Suppr   : Supprimer le favori de la liste
+ b           : Retirer le dossier de la liste des favoris
  `
 
 	HelpContentArchive = `
@@ -39,12 +46,12 @@ const (
  ----------------------
  F1          : Afficher cette aide
  Entrée      : Visualiser un fichier dans l'archive
- ..          : Remonter dans l'arborescence (ou sortir de l'archive si à la racine)
- TAB         : Basculer vers le visualiseur
+ ..          : Remonter (ou sortir de l'archive si à la racine)
+ TAB/S-TAB   : Naviguer entre les panneaux (Cycle)
  
  [yellow]Actions Spécifiques[white]
  --------------------
- Ctrl + E    : Extraire le fichier ou dossier sélectionné vers le dossier hôte
+ Ctrl + E    : Extraire l'élément sélectionné vers le dossier hôte
  `
 
 	HelpContentEditor = `

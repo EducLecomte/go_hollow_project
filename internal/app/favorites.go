@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 )
 
 // Favorite représente un marque-page vers un dossier.
@@ -43,6 +42,7 @@ func (e *EditorApp) loadFavorites() {
 		return
 	}
 	e.Favorites = favs
+	e.refreshFavoritesList()
 }
 
 // saveFavorites enregistre la liste actuelle de favoris dans le fichier de configuration.
@@ -54,82 +54,111 @@ func (e *EditorApp) saveFavorites() {
 	}
 }
 
-// showFavoritesDialog affiche la modale listant les dossiers favoris.
-func (e *EditorApp) showFavoritesDialog() {
-	list := tview.NewList().ShowSecondaryText(true)
-	list.SetBorder(true).SetTitle(" Dossiers Favoris (Ctrl+B) ").SetTitleAlign(tview.AlignCenter)
-	list.SetSelectedBackgroundColor(tcell.ColorWhite).SetSelectedTextColor(tcell.ColorBlack)
-
-	refreshList := func() {
-		list.Clear()
-		list.AddItem("[+] Ajouter le dossier courant", e.CurrentDir, 'a', nil)
-		for i, fav := range e.Favorites {
-			shortcut := rune(0)
-			if i < 9 {
-				shortcut = rune('1' + i)
-			}
-			list.AddItem(fav.Name, fav.Path, shortcut, nil)
+// addFavorite ajoute ou retire un dossier des favoris (comportement toggle).
+func (e *EditorApp) addFavorite(path string) {
+	// Vérifier si déjà présent pour le retirer (Toggle)
+	for i, f := range e.Favorites {
+		if f.Path == path {
+			e.Favorites = append(e.Favorites[:i], e.Favorites[i+1:]...)
+			e.saveFavorites()
+			e.refreshFavoritesList()
+			e.updateStatusTemp("[yellow]Retiré des favoris : " + f.Name)
+			return
 		}
 	}
 
-	refreshList()
+	name := filepath.Base(path)
+	if name == "." || name == "/" || name == "" {
+		name = "Racine"
+	}
 
-	list.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
-		if index == 0 {
-			// Ajouter le dossier courant
-			fav := Favorite{
-				Name: filepath.Base(e.CurrentDir),
-				Path: e.CurrentDir,
-			}
-			if fav.Name == "." || fav.Name == "/" || fav.Name == "" {
-				fav.Name = "Racine"
-			}
-			e.Favorites = append(e.Favorites, fav)
-			e.saveFavorites()
-			refreshList()
-			list.SetCurrentItem(len(e.Favorites)) // Sélectionner le nouvel élément rajouté
-		} else {
-			// Naviguer vers le favori
-			if index-1 < len(e.Favorites) {
-				targetPath := e.Favorites[index-1].Path
-				
-				// Revenir au système de fichiers local si on était dans un sous-système (ex: Archive)
-				if e.PreviousFS != nil {
-					e.FileSystem = e.PreviousFS
-					e.PreviousFS = nil
-				}
-				
-				e.CurrentDir = targetPath
-				e.refreshFileList()
-				e.Pages.RemovePage("favorites")
-				e.App.SetFocus(e.FileList)
-			}
+	e.Favorites = append(e.Favorites, Favorite{Name: name, Path: path})
+	e.saveFavorites()
+	e.refreshFavoritesList()
+	e.updateStatusTemp("[green]Ajouté aux favoris : " + name)
+}
+
+// toggleFavorites affiche ou masque la barre latérale des favoris.
+func (e *EditorApp) toggleFavorites() {
+	e.ShowFavs = !e.ShowFavs
+	e.rebuildMainLayout()
+	if e.ShowFavs {
+		e.App.SetFocus(e.FavList)
+	} else {
+		e.App.SetFocus(e.FileList)
+	}
+}
+
+// refreshFavoritesList met à jour le contenu du widget de liste des favoris.
+func (e *EditorApp) refreshFavoritesList() {
+	e.FavList.Clear()
+	for i, fav := range e.Favorites {
+		shortcut := rune(0)
+		if i < 9 {
+			shortcut = rune('1' + i)
+		}
+		e.FavList.AddItem(fav.Name, fav.Path, shortcut, nil)
+	}
+}
+
+// setupFavHandlers configure les actions clavier pour la liste des favoris.
+func (e *EditorApp) setupFavHandlers() {
+	e.FavList.SetChangedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
+		if index >= 0 && index < len(e.Favorites) {
+			e.FileSizeBox.SetText("[yellow]Favori : [white]" + e.Favorites[index].Path)
 		}
 	})
 
-	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyCtrlB || event.Key() == tcell.KeyLeft {
-			e.Pages.RemovePage("favorites")
+	e.FavList.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
+		if index < len(e.Favorites) {
+			targetPath := e.Favorites[index].Path
+
+			// Sortie de système de fichiers virtuel si nécessaire
+			if e.PreviousFS != nil {
+				e.FileSystem = e.PreviousFS
+				e.PreviousFS = nil
+			}
+
+			e.CurrentDir = targetPath
+			e.refreshFileList()
+			e.App.SetFocus(e.FileList)
+		}
+	})
+
+	e.FavList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyTab:
 			e.App.SetFocus(e.FileList)
 			return nil
-		}
-		if event.Key() == tcell.KeyDelete {
-			index := list.GetCurrentItem()
-			if index > 0 && index-1 < len(e.Favorites) {
-				e.Favorites = append(e.Favorites[:index-1], e.Favorites[index:]...)
+		case tcell.KeyBacktab:
+			e.App.SetFocus(e.Viewer)
+			return nil
+		case tcell.KeyCtrlX:
+			e.showQuitConfirmation()
+			return nil
+		case tcell.KeyCtrlB, tcell.KeyEsc:
+			e.toggleFavorites()
+			return nil
+		case tcell.KeyDelete:
+			index := e.FavList.GetCurrentItem()
+			if index >= 0 && index < len(e.Favorites) {
+				e.Favorites = append(e.Favorites[:index], e.Favorites[index+1:]...)
 				e.saveFavorites()
-				refreshList()
-				// Ajuster la sélection
-				if index < list.GetItemCount() {
-					list.SetCurrentItem(index)
-				} else {
-					list.SetCurrentItem(list.GetItemCount() - 1)
-				}
+				e.refreshFavoritesList()
 			}
 			return nil
+		case tcell.KeyRune:
+			r := event.Rune()
+			if r == 'd' || r == 'b' {
+				index := e.FavList.GetCurrentItem()
+				if index >= 0 && index < len(e.Favorites) {
+					e.Favorites = append(e.Favorites[:index], e.Favorites[index+1:]...)
+					e.saveFavorites()
+					e.refreshFavoritesList()
+				}
+				return nil
+			}
 		}
 		return event
 	})
-
-	e.showCenteredDialog("favorites", list, 60, 20)
 }

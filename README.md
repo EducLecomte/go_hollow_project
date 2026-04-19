@@ -22,7 +22,8 @@ Ce projet est développé avec une IA, dans un but récréatif et éducatif.
 - **Prévisualisation intelligente** : Coloration syntaxique temps réel (via Chroma) et vue arborescente pour les dossiers.
 - **Éditeur de texte riche** : Mode plein écran, numérotation des lignes, recherche textuelle (`Ctrl+F`), et gestion des fins de ligne.
   !Éditeur
-- **Aide Contextuelle Dynamique** : Appuyez sur `F1` à tout moment pour voir les raccourcis spécifiques au mode actuel (Explorateur, Archive ou Éditeur).
+- **Barre latérale des Favoris** : Enregistrez vos dossiers fréquents et accédez-y instantanément via une barre latérale rétractable (`Ctrl+B`).
+- **Aide Contextuelle Dynamique** : Appuyez sur `F1` à tout moment pour voir les raccourcis spécifiques au mode actuel.
   !Aide
 
 ## Architecture Technique
@@ -31,19 +32,24 @@ Le projet repose sur une abstraction puissante du système de fichiers (**VFS**)
 
 ## Raccourcis Clavier
 
-### Navigation (Explorateur / Visualiseur)
+### Navigation (Explorateur / Visualiseur / Favoris)
 | Touche | Action |
 | :--- | :--- |
-| `F1` | Aide contextuelle (Explorateur/Archive) |
+| `F1` | Aide contextuelle (adaptée au panneau actif) |
 | `F3` | Ouvrir le dialogue de connexion FTP |
-| `TAB` / `Ctrl + X` | Basculer focus entre l'Explorateur et le Visualiseur |
+| `Ctrl + B` | Afficher / Masquer la barre latérale des Favoris |
+| `TAB` | Passer au panneau suivant (Favoris → Explorateur → Visualiseur) |
+| `Shift + TAB` | Passer au panneau précédent (cycle inverse) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier / archive |
+| `b` | Ajouter / Retirer le dossier courant des favoris |
+| `1-9` | Accès rapide direct aux favoris (quand la barre est ouverte) |
+| `d` / `Suppr` | Supprimer un favori (quand la barre des favoris a le focus) |
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |
-| `Suppr` | Supprimer l'élément sélectionné |
+| `Suppr` | Supprimer l'élément sélectionné dans l'explorateur |
 | `Ctrl + E` | Extraire une archive (ou un fichier d'une archive) |
 | `Ctrl + K` / `Ctrl + U` | Copier / Coller un élément |
-| `Ctrl + X` | Quitter Hollow (quand l'Explorateur a le focus) |
+| `Ctrl + X` | Quitter Hollow (demande confirmation) |
 
 ### Édition (Éditeur Plein Écran)
 | Touche | Action |

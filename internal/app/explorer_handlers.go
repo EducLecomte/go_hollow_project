@@ -13,6 +13,29 @@ func (e *EditorApp) setupExplorerHandlers() {
 		case tcell.KeyTab:
 			e.App.SetFocus(e.Viewer)
 			return nil
+		case tcell.KeyBacktab:
+			if e.ShowFavs {
+				e.App.SetFocus(e.FavList)
+			} else {
+				e.App.SetFocus(e.Viewer)
+			}
+			return nil
+		case tcell.KeyCtrlB:
+			e.toggleFavorites()
+			return nil
+		case tcell.KeyRune:
+			if event.Rune() == 'b' {
+				index := e.FileList.GetCurrentItem()
+				if index > 0 && index-1 < len(e.CurrentFiles) {
+					file := e.CurrentFiles[index-1]
+					if file.IsDir {
+						e.addFavorite(filepath.Join(e.CurrentDir, file.Name))
+					} else {
+						e.updateStatusTemp("[red]Seuls les dossiers peuvent être mis en favoris")
+					}
+				}
+				return nil
+			}
 		case tcell.KeyCtrlX:
 			e.showQuitConfirmation()
 			return nil
@@ -21,9 +44,6 @@ func (e *EditorApp) setupExplorerHandlers() {
 			return nil
 		case tcell.KeyCtrlD:
 			e.showNewDirDialog()
-			return nil
-		case tcell.KeyCtrlB:
-			e.showFavoritesDialog()
 			return nil
 		case tcell.KeyCtrlK:
 			index := e.FileList.GetCurrentItem()
