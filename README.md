@@ -9,22 +9,19 @@ Ce projet est développé avec une IA, dans un but récréatif et pédagogique.
 ## Aperçu
 
 ![Explorateur](screenshot-explorer.png)
-*L'explorateur de fichiers avec prévisualisation intelligente et navigation asynchrone.*
+*L'explorateur de fichiers avec navigation asynchrone et client FTP intégré.*
 
 ## Fonctionnalités Clés
 
 - **Explorateur de fichiers multi-protocoles** : Navigation fluide dans l'arborescence locale et distante (FTP).
-- **Architecture Asynchrone** : Chargement des fichiers et prévisualisations en arrière-plan avec système d'annulation intelligent (Context). L'interface ne "gèle" jamais, même sur des connexions réseaux (FTP) lentes, et les opérations longues peuvent être interrompues instantanément.
-- **Client FTP Intégré** : Connectez-vous à des serveurs distants via `F3` et éditez vos fichiers comme s'ils étaient sur votre disque.
-  !FTP
+- **Architecture Asynchrone** : Chargement des fichiers en arrière-plan avec système d'annulation intelligent (Context). L'interface ne "gèle" jamais, même sur des connexions réseaux lentes.
+- **Client FTP Intégré** : Connectez-vous à des serveurs distants (via `Ctrl+T`) et éditez vos fichiers comme s'ils étaient sur votre disque.
+- **Gestion des droits (Chmod/Chown)** : Modifiez les permissions, les propriétaires et groupes directement depuis l'explorateur (via `Ctrl+O`), avec support de la récursivité locale.
 - **Sécurité et Robustesse** : Détection automatique des fichiers binaires (images, exécutables) avec avertissements pour éviter les affichages illisibles ou les plantages.
 - **Explorateur d'archives** : Navigation transparente et extraction à la volée du contenu des fichiers `.zip`, `.tar` et `.tar.gz`.
-- **Prévisualisation intelligente** : Coloration syntaxique temps réel (via Chroma) et vue arborescente pour les dossiers.
-- **Éditeur de texte riche** : Mode plein écran, numérotation des lignes, recherche textuelle (`Ctrl+F`), et gestion des fins de ligne.
-  !Éditeur
+- **Éditeur de texte** : Mode plein écran, numérotation des lignes, recherche textuelle (`Ctrl+F`), et raccourcis de copier-coller classiques (façon Nano).
 - **Barre latérale des Favoris** : Enregistrez vos dossiers fréquents et accédez-y instantanément via une barre latérale rétractable (`Ctrl+B`).
-- **Aide Contextuelle Dynamique** : Appuyez sur `F1` à tout moment pour voir les raccourcis spécifiques au mode actuel.
-  !Aide
+- **Aide Contextuelle Dynamique** : Appuyez sur `Ctrl+G` à tout moment pour voir les raccourcis spécifiques au mode actuel.
 
 ## Architecture Technique
 
