@@ -90,6 +90,7 @@ func (a *ArchiveFS) addNode(path string, info FileInfo, zipFile *zip.File) {
 				IsDir:       isDir,
 				Permissions: "r--r--r--", // Read Only
 				Owner:       "archive",
+				Group:       "archive",
 				Mode:        0444,
 			}
 
@@ -185,6 +186,7 @@ func (a *ArchiveFS) scanTar(ctx context.Context) error {
 			ModTime:     hdr.ModTime,
 			Permissions: hdr.FileInfo().Mode().String(),
 			Owner:       hdr.Uname,
+			Group:       hdr.Gname,
 			Mode:        hdr.FileInfo().Mode(),
 		}, nil)
 	}
@@ -357,5 +359,10 @@ func (a *ArchiveFS) Close() error {
 
 // Chmod renvoie une erreur : les archives sont montées en lecture seule.
 func (a *ArchiveFS) Chmod(ctx context.Context, path string, mode os.FileMode) error {
+	return fmt.Errorf("les archives sont montées en lecture seule")
+}
+
+// Chown renvoie une erreur : les archives sont montées en lecture seule.
+func (a *ArchiveFS) Chown(ctx context.Context, path, owner, group string) error {
 	return fmt.Errorf("les archives sont montées en lecture seule")
 }

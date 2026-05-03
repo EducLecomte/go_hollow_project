@@ -20,6 +20,7 @@ type FileInfo struct {
 	ModTime     time.Time
 	Permissions string
 	Owner       string
+	Group       string
 	Mode        os.FileMode
 }
 
@@ -33,6 +34,7 @@ type VFS interface {
 	Remove(ctx context.Context, path string) error
 	Stat(ctx context.Context, path string) (FileInfo, error)
 	Chmod(ctx context.Context, path string, mode os.FileMode) error
+	Chown(ctx context.Context, path, owner, group string) error
 	Close() error
 }
 
@@ -59,12 +61,17 @@ func (l *LocalFS) List(ctx context.Context, path string) ([]FileInfo, error) {
 			continue
 		}
 
-		// Extraction des infos Unix (Propriétaire)
+		// Extraction des infos Unix (Propriétaire et Groupe)
 		owner := "unknown"
+		group := "unknown"
 		if stat, ok := info.Sys().(*syscall.Stat_t); ok {
 			u, err := user.LookupId(fmt.Sprint(stat.Uid))
 			if err == nil {
 				owner = u.Username
+			}
+			g, err := user.LookupGroupId(fmt.Sprint(stat.Gid))
+			if err == nil {
+				group = g.Name
 			}
 		}
 
@@ -75,6 +82,7 @@ func (l *LocalFS) List(ctx context.Context, path string) ([]FileInfo, error) {
 			ModTime:     info.ModTime(),
 			Permissions: info.Mode().String(),
 			Owner:       owner,
+			Group:       group,
 			Mode:        info.Mode(),
 		})
 	}
@@ -178,10 +186,15 @@ func (l *LocalFS) Stat(ctx context.Context, path string) (FileInfo, error) {
 	}
 
 	owner := "unknown"
+	group := "unknown"
 	if stat, ok := info.Sys().(*syscall.Stat_t); ok {
 		u, err := user.LookupId(fmt.Sprint(stat.Uid))
 		if err == nil {
 			owner = u.Username
+		}
+		g, err := user.LookupGroupId(fmt.Sprint(stat.Gid))
+		if err == nil {
+			group = g.Name
 		}
 	}
 
@@ -192,6 +205,7 @@ func (l *LocalFS) Stat(ctx context.Context, path string) (FileInfo, error) {
 		ModTime:     info.ModTime(),
 		Permissions: info.Mode().String(),
 		Owner:       owner,
+		Group:       group,
 		Mode:        info.Mode(),
 	}, nil
 }
@@ -209,6 +223,33 @@ func (l *LocalFS) Chmod(ctx context.Context, path string, mode os.FileMode) erro
 	default:
 	}
 	return os.Chmod(path, mode)
+}
+
+// Chown modifie le propriétaire et le groupe d'un fichier local.
+func (l *LocalFS) Chown(ctx context.Context, path, owner, group string) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+	
+	uid := -1
+	gid := -1
+	
+	if owner != "" {
+		u, err := user.Lookup(owner)
+		if err == nil {
+			fmt.Sscanf(u.Uid, "%d", &uid)
+		}
+	}
+	if group != "" {
+		g, err := user.LookupGroup(group)
+		if err == nil {
+			fmt.Sscanf(g.Gid, "%d", &gid)
+		}
+	}
+	
+	return os.Chown(path, uid, gid)
 }
 
 // CopyRecursiveBetweenVFS copie récursivement des fichiers ou répertoires entre deux implémentations différentes de VFS.
@@ -247,4 +288,66 @@ func CopyRecursiveBetweenVFS(ctx context.Context, srcFS, dstFS VFS, src, dst str
 	defer reader.Close()
 
 	return dstFS.Write(ctx, dst, reader)
+}
+
+// ChmodRecursive applique Chmod de manière récursive sur un dossier.
+func ChmodRecursive(ctx context.Context, fs VFS, path string, mode os.FileMode) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
+	if err := fs.Chmod(ctx, path, mode); err != nil {
+		return err
+	}
+
+	info, err := fs.Stat(ctx, path)
+	if err != nil {
+		return err
+	}
+
+	if info.IsDir {
+		entries, err := fs.List(ctx, path)
+		if err != nil {
+			return err
+		}
+		for _, entry := range entries {
+			if err := ChmodRecursive(ctx, fs, filepath.Join(path, entry.Name), mode); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// ChownRecursive applique Chown de manière récursive sur un dossier.
+func ChownRecursive(ctx context.Context, fs VFS, path, owner, group string) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
+	if err := fs.Chown(ctx, path, owner, group); err != nil {
+		return err
+	}
+
+	info, err := fs.Stat(ctx, path)
+	if err != nil {
+		return err
+	}
+
+	if info.IsDir {
+		entries, err := fs.List(ctx, path)
+		if err != nil {
+			return err
+		}
+		for _, entry := range entries {
+			if err := ChownRecursive(ctx, fs, filepath.Join(path, entry.Name), owner, group); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

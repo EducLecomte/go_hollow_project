@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/EducLecomte/go_hollow_project/internal/utils"
+	"github.com/EducLecomte/go_hollow_project/internal/vfs"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -56,6 +57,7 @@ func (e *EditorApp) showHelp(content string) {
 
 // showQuitConfirmation affiche une boîte de dialogue demandant confirmation avant de quitter définitivement l'application.
 func (e *EditorApp) showQuitConfirmation() {
+	previousFocus := e.App.GetFocus()
 	modal := tview.NewModal().
 		SetText("Voulez-vous vraiment quitter Hollow ?").
 		AddButtons([]string{"Oui", "Non"}).
@@ -65,6 +67,9 @@ func (e *EditorApp) showQuitConfirmation() {
 				e.App.Stop()
 			}
 			e.Pages.RemovePage("quit")
+			if previousFocus != nil {
+				e.App.SetFocus(previousFocus)
+			}
 		})
 	e.Pages.AddPage("quit", modal, true, true)
 }
@@ -115,6 +120,7 @@ func (e *EditorApp) showNewFileDialog() {
 
 // showSaveConfirmation demande à l'utilisateur s'il souhaite sauvegarder ses modifications avant de fermer l'éditeur plein écran.
 func (e *EditorApp) showSaveConfirmation(content string) {
+	previousFocus := e.App.GetFocus()
 	modal := tview.NewModal().
 		SetText("Voulez-vous sauvegarder les modifications avant de quitter ?").
 		AddButtons([]string{"Sauvegarder", "Ignorer", "Annuler"}).
@@ -132,6 +138,9 @@ func (e *EditorApp) showSaveConfirmation(content string) {
 				// On ferme juste la modale, le focus revient à l'éditeur
 			}
 			e.Pages.RemovePage("save_confirm")
+			if buttonLabel != "Sauvegarder" && buttonLabel != "Ignorer" && previousFocus != nil {
+				e.App.SetFocus(previousFocus)
+			}
 		})
 
 	e.Pages.AddPage("save_confirm", modal, true, true)
@@ -208,6 +217,15 @@ func (e *EditorApp) showFTPDialog() {
 		e.App.SetFocus(e.FileList)
 	})
 
+	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEscape {
+			e.Pages.RemovePage("ftp")
+			e.App.SetFocus(e.FileList)
+			return nil
+		}
+		return event
+	})
+
 	form.SetBorder(true).SetTitle(" Connexion FTP ").SetTitleAlign(tview.AlignCenter)
 	e.showCenteredDialog("ftp", form, 50, 15)
 }
@@ -218,7 +236,7 @@ func (e *EditorApp) showLoadingDialog(title string, message string, cancelFunc c
 		SetText(message).
 		AddButtons([]string{"Annuler"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			if buttonLabel == "Annuler" && cancelFunc != nil {
+			if (buttonLabel == "Annuler" || buttonLabel == "") && cancelFunc != nil {
 				cancelFunc()
 			}
 			e.Pages.RemovePage("loading")
@@ -228,6 +246,7 @@ func (e *EditorApp) showLoadingDialog(title string, message string, cancelFunc c
 
 // showBinaryOpenConfirmation affiche un avertissement avant d'ouvrir un fichier détecté comme binaire ou non-textuel.
 func (e *EditorApp) showBinaryOpenConfirmation(path string, onConfirm func()) {
+	previousFocus := e.App.GetFocus()
 	fileName := filepath.Base(path)
 	fileDescription := utils.GetBinaryFileDescription(fileName)
 	
@@ -239,6 +258,9 @@ func (e *EditorApp) showBinaryOpenConfirmation(path string, onConfirm func()) {
 				onConfirm()
 			}
 			e.Pages.RemovePage("binary_confirm")
+			if buttonLabel != "Ouvrir" && previousFocus != nil {
+				e.App.SetFocus(previousFocus)
+			}
 		})
 	e.Pages.AddPage("binary_confirm", modal, true, true)
 }
@@ -281,37 +303,75 @@ func (e *EditorApp) showChmodDialog() {
 	file := e.CurrentFiles[index-1]
 	path := filepath.Join(e.CurrentDir, file.Name)
 	currentMode := fmt.Sprintf("%04o", file.Mode.Perm() & 0777)
+	currentOwner := file.Owner
+	currentGroup := file.Group
 
-	inputField := tview.NewInputField().
-		SetLabel(" Permissions (octal) : ").
-		SetText(currentMode)
+	form := tview.NewForm().
+		AddInputField("Permissions (octal)", currentMode, 10, nil, nil).
+		AddInputField("Propriétaire", currentOwner, 15, nil, nil).
+		AddInputField("Groupe", currentGroup, 15, nil, nil)
 
-	inputField.SetBorder(true).
-		SetTitle(fmt.Sprintf(" Chmod: %s ", file.Name)).
+	if file.IsDir {
+		form.AddCheckbox("Récursif (-R)", false, nil)
+	}
+
+	form.AddButton("Enregistrer", func() {
+		newModeStr := form.GetFormItem(0).(*tview.InputField).GetText()
+		newOwner := form.GetFormItem(1).(*tview.InputField).GetText()
+		newGroup := form.GetFormItem(2).(*tview.InputField).GetText()
+
+		isRecursive := false
+		if file.IsDir {
+			isRecursive = form.GetFormItem(3).(*tview.Checkbox).IsChecked()
+		}
+
+		newMode, err := strconv.ParseUint(newModeStr, 8, 32)
+		if err != nil {
+			e.updateStatusTemp("[red]Format octal invalide")
+			return
+		}
+
+		ctx := context.Background()
+		var errChmod, errChown error
+
+		if isRecursive {
+			errChmod = vfs.ChmodRecursive(ctx, e.FileSystem, path, os.FileMode(newMode))
+			errChown = vfs.ChownRecursive(ctx, e.FileSystem, path, newOwner, newGroup)
+		} else {
+			errChmod = e.FileSystem.Chmod(ctx, path, os.FileMode(newMode))
+			errChown = e.FileSystem.Chown(ctx, path, newOwner, newGroup)
+		}
+
+		if errChmod != nil {
+			e.updateStatusTemp(fmt.Sprintf("[red]Erreur chmod: %v", errChmod))
+		} else if errChown != nil {
+			e.updateStatusTemp(fmt.Sprintf("[red]Erreur chown: %v", errChown))
+		} else {
+			e.updateStatusTemp("[green]Propriétés modifiées avec succès")
+			e.refreshFileList()
+		}
+		
+		e.Pages.RemovePage("chmod")
+		e.App.SetFocus(e.FileList)
+	})
+
+	form.AddButton("Annuler", func() {
+		e.Pages.RemovePage("chmod")
+		e.App.SetFocus(e.FileList)
+	})
+
+	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEscape {
+			e.Pages.RemovePage("chmod")
+			e.App.SetFocus(e.FileList)
+			return nil
+		}
+		return event
+	})
+
+	form.SetBorder(true).
+		SetTitle(fmt.Sprintf(" Propriétés: %s ", file.Name)).
 		SetTitleAlign(tview.AlignCenter)
 
-	e.showCenteredDialog("chmod", inputField, 60, 3)
-
-	inputField.SetDoneFunc(func(key tcell.Key) {
-		if key == tcell.KeyEnter {
-			newModeStr := inputField.GetText()
-			newMode, err := strconv.ParseUint(newModeStr, 8, 32)
-			if err != nil {
-				e.updateStatusTemp("[red]Format octal invalide")
-			} else {
-				err = e.FileSystem.Chmod(context.Background(), path, os.FileMode(newMode))
-				if err != nil {
-					e.updateStatusTemp(fmt.Sprintf("[red]Erreur: %v", err))
-				} else {
-					e.updateStatusTemp("[green]Permissions modifiées avec succès")
-					e.refreshFileList()
-				}
-			}
-			e.Pages.RemovePage("chmod")
-			e.App.SetFocus(e.FileList)
-		} else if key == tcell.KeyEscape {
-			e.Pages.RemovePage("chmod")
-			e.App.SetFocus(e.FileList)
-		}
-	})
+	e.showCenteredDialog("chmod", form, 55, 15)
 }

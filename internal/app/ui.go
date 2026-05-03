@@ -123,9 +123,9 @@ func (e *EditorApp) setupUI() {
 
 		// Mise à jour immédiate des infos basiques (synchrone)
 		if file.IsDir {
-			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", modTimeStr, file.Permissions, file.Owner))
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Type: [white]Dossier\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Proprio: [white]%s\n[green]Groupe: [white]%s", modTimeStr, file.Permissions, file.Owner, file.Group))
 		} else {
-			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Owner: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner))
+			e.FileSizeBox.SetText(fmt.Sprintf("[green]Taille: [white]%s\n[green]Date: [white]%s\n[green]Droits: [white]%s\n[green]Proprio: [white]%s\n[green]Groupe: [white]%s", utils.FormatSize(file.Size), modTimeStr, file.Permissions, file.Owner, file.Group))
 		}
 
 		// Prévisualisation asynchrone (E/S et Coloration)
@@ -234,7 +234,7 @@ func (e *EditorApp) rebuildMainLayout() {
 	// 2. Colonne de navigation complète (Nav + Info en bas)
 	navColumn := tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(navHorizontalFlex, 0, 1, true).
-		AddItem(e.FileSizeBox, 6, 0, false) // Bloc info (6 lignes pour 4 d'infos + bordure)
+		AddItem(e.FileSizeBox, 7, 0, false) // Bloc info (7 lignes pour les infos étendues + bordure)
 
 	// 3. Contenu principal (Navigation + Visualiseur)
 	contentFlex := tview.NewFlex().SetDirection(tview.FlexColumn).

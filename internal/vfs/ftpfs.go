@@ -138,6 +138,7 @@ func (f *FtpFS) List(ctx context.Context, path string) ([]FileInfo, error) {
 			ModTime:     entry.Time,
 			Permissions: "rwxr-xr-x",
 			Owner:       "ftp",
+			Group:       "ftp",
 			Mode:        0755,
 		})
 	}
@@ -207,6 +208,7 @@ func (f *FtpFS) Stat(ctx context.Context, path string) (FileInfo, error) {
 				ModTime:     entry.Time,
 				Permissions: "rwxr-xr-x",
 				Owner:       "ftp",
+				Group:       "ftp",
 				Mode:        0755,
 			}, nil
 		}
@@ -221,4 +223,8 @@ func (f *FtpFS) Close() error {
 
 func (f *FtpFS) Chmod(ctx context.Context, path string, mode os.FileMode) error {
 	return fmt.Errorf("modification des permissions non supportée via ce client FTP")
+}
+
+func (f *FtpFS) Chown(ctx context.Context, path, owner, group string) error {
+	return fmt.Errorf("modification du propriétaire non supportée via ce client FTP")
 }
