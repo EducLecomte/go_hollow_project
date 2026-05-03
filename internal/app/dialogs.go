@@ -3,7 +3,9 @@ package app
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/EducLecomte/go_hollow_project/internal/utils"
 	"github.com/gdamore/tcell/v2"
@@ -266,6 +268,50 @@ func (e *EditorApp) showRenameFavoriteDialog(index int) {
 		} else if key == tcell.KeyEscape {
 			e.Pages.RemovePage("rename_fav")
 			e.App.SetFocus(e.FavList)
+		}
+	})
+}
+
+// showChmodDialog affiche une fenêtre pour modifier les permissions Unix d'un fichier/dossier.
+func (e *EditorApp) showChmodDialog() {
+	index := e.FileList.GetCurrentItem()
+	if index <= 0 || index-1 >= len(e.CurrentFiles) {
+		return
+	}
+	file := e.CurrentFiles[index-1]
+	path := filepath.Join(e.CurrentDir, file.Name)
+	currentMode := fmt.Sprintf("%04o", file.Mode.Perm() & 0777)
+
+	inputField := tview.NewInputField().
+		SetLabel(" Permissions (octal) : ").
+		SetText(currentMode)
+
+	inputField.SetBorder(true).
+		SetTitle(fmt.Sprintf(" Chmod: %s ", file.Name)).
+		SetTitleAlign(tview.AlignCenter)
+
+	e.showCenteredDialog("chmod", inputField, 60, 3)
+
+	inputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			newModeStr := inputField.GetText()
+			newMode, err := strconv.ParseUint(newModeStr, 8, 32)
+			if err != nil {
+				e.updateStatusTemp("[red]Format octal invalide")
+			} else {
+				err = e.FileSystem.Chmod(context.Background(), path, os.FileMode(newMode))
+				if err != nil {
+					e.updateStatusTemp(fmt.Sprintf("[red]Erreur: %v", err))
+				} else {
+					e.updateStatusTemp("[green]Permissions modifiées avec succès")
+					e.refreshFileList()
+				}
+			}
+			e.Pages.RemovePage("chmod")
+			e.App.SetFocus(e.FileList)
+		} else if key == tcell.KeyEscape {
+			e.Pages.RemovePage("chmod")
+			e.App.SetFocus(e.FileList)
 		}
 	})
 }

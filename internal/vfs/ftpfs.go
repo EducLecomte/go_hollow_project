@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -137,6 +138,7 @@ func (f *FtpFS) List(ctx context.Context, path string) ([]FileInfo, error) {
 			ModTime:     entry.Time,
 			Permissions: "rwxr-xr-x",
 			Owner:       "ftp",
+			Mode:        0755,
 		})
 	}
 	return files, nil
@@ -205,6 +207,7 @@ func (f *FtpFS) Stat(ctx context.Context, path string) (FileInfo, error) {
 				ModTime:     entry.Time,
 				Permissions: "rwxr-xr-x",
 				Owner:       "ftp",
+				Mode:        0755,
 			}, nil
 		}
 	}
@@ -214,4 +217,8 @@ func (f *FtpFS) Stat(ctx context.Context, path string) (FileInfo, error) {
 
 func (f *FtpFS) Close() error {
 	return f.conn.Quit()
+}
+
+func (f *FtpFS) Chmod(ctx context.Context, path string, mode os.FileMode) error {
+	return fmt.Errorf("modification des permissions non supportée via ce client FTP")
 }

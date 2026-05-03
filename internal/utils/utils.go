@@ -28,6 +28,7 @@ const (
  ----------------------
  Entrée      : Ouvrir un fichier / Entrer dans un dossier
  ..          : Remonter au dossier parent
+ Ctrl + O    : Changer les permissions (Chmod)
  Ctrl + A    : Ajouter le dossier courant des favoris
  Ctrl + F    : Créer un nouveau fichier
  Ctrl + D    : Créer un nouveau dossier

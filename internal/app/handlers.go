@@ -14,7 +14,7 @@ func (e *EditorApp) setupHandlers() {
 			tcell.KeyCtrlS: true, tcell.KeyCtrlF: true, tcell.KeyCtrlD: true,
 			tcell.KeyCtrlK: true, tcell.KeyCtrlU: true, tcell.KeyCtrlB: true,
 			tcell.KeyCtrlV: true, tcell.KeyCtrlX: true, tcell.KeyCtrlE: true,
-			tcell.KeyCtrlP: true, tcell.KeyCtrlG: true, tcell.KeyCtrlT: true,
+			tcell.KeyCtrlP: true, tcell.KeyCtrlG: true, tcell.KeyCtrlT: true, tcell.KeyCtrlO: true,
 			tcell.KeyCtrlA: true, tcell.KeyCtrlN: true, tcell.KeyCtrlR: true,
 			tcell.KeyTab: true, tcell.KeyEnter: true,
 			tcell.KeyBackspace: true, tcell.KeyBackspace2: true,

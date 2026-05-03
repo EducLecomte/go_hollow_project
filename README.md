@@ -47,6 +47,7 @@ Le projet repose sur une abstraction puissante du système de fichiers (**VFS**)
 | `Ctrl + N` | Renommer le favori sélectionné |
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |
+| `Ctrl + O` | Modifier les permissions (Chmod - local uniquement) |
 | `Ctrl + R` / `Suppr` | Supprimer l'élément sélectionné dans l'explorateur ou les favoris |
 | `Ctrl + E` | Extraire une archive (ou un fichier d'une archive) |
 | `Ctrl + K` / `Ctrl + U` | Copier / Coller un élément |

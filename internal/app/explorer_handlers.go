@@ -59,6 +59,9 @@ func (e *EditorApp) setupExplorerHandlers() {
 		case tcell.KeyDelete, tcell.KeyCtrlR:
 			e.showDeleteConfirmation()
 			return nil
+		case tcell.KeyCtrlO:
+			e.showChmodDialog()
+			return nil
 		}
 		return event
 	})

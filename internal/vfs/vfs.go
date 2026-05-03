@@ -20,6 +20,7 @@ type FileInfo struct {
 	ModTime     time.Time
 	Permissions string
 	Owner       string
+	Mode        os.FileMode
 }
 
 // VFS est l'interface que devront implémenter tes différents modules
@@ -31,6 +32,7 @@ type VFS interface {
 	Copy(ctx context.Context, src, dst string) error
 	Remove(ctx context.Context, path string) error
 	Stat(ctx context.Context, path string) (FileInfo, error)
+	Chmod(ctx context.Context, path string, mode os.FileMode) error
 	Close() error
 }
 
@@ -73,6 +75,7 @@ func (l *LocalFS) List(ctx context.Context, path string) ([]FileInfo, error) {
 			ModTime:     info.ModTime(),
 			Permissions: info.Mode().String(),
 			Owner:       owner,
+			Mode:        info.Mode(),
 		})
 	}
 	return files, nil
@@ -189,12 +192,23 @@ func (l *LocalFS) Stat(ctx context.Context, path string) (FileInfo, error) {
 		ModTime:     info.ModTime(),
 		Permissions: info.Mode().String(),
 		Owner:       owner,
+		Mode:        info.Mode(),
 	}, nil
 }
 
 // Close libère les ressources associées au système de fichiers (non requis pour le local).
 func (l *LocalFS) Close() error {
 	return nil
+}
+
+// Chmod modifie les permissions d'un fichier ou répertoire local.
+func (l *LocalFS) Chmod(ctx context.Context, path string, mode os.FileMode) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+	return os.Chmod(path, mode)
 }
 
 // CopyRecursiveBetweenVFS copie récursivement des fichiers ou répertoires entre deux implémentations différentes de VFS.
