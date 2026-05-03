@@ -8,16 +8,16 @@ import (
 )
 
 const (
-	HelpMsgDefault = "[yellow]F1:[white] Aide | [yellow]Ctrl+P:[white] Finder | [yellow]Ctrl+B:[white] Sidebar | [yellow]b:[white] Fav | [yellow]Ctrl+X:[white] Quitter"
-	HelpMsgEdit    = "[yellow]F1:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] C/V | [yellow]Esc:[white] Quitter"
-	HelpMsgView    = "[yellow]F1:[white] Aide | [yellow]TAB/S-TAB:[white] Cycle | [yellow]Ctrl+X:[white] Quitter | [yellow]Flèches:[white] Défiler"
-	HelpMsgArchive = "[yellow]F1:[white] Aide | [yellow]Entrée:[white] Aperçu | [yellow]Ctrl+E:[white] Extraire | [yellow]..:[white] Sortir"
+	HelpMsgDefault = "[yellow]Ctrl+G:[white] Aide | [yellow]Ctrl+P:[white] Finder | [yellow]Ctrl+B:[white] Sidebar | [yellow]Ctrl+A:[white] Fav | [yellow]Ctrl+X:[white] Quitter"
+	HelpMsgEdit    = "[yellow]Ctrl+G:[white] Aide | [yellow]Ctrl+S:[white] Sauver | [yellow]Ctrl+F:[white] Chercher | [yellow]Ctrl+K/U:[white] C/V | [yellow]Esc:[white] Quitter"
+	HelpMsgView    = "[yellow]Ctrl+G:[white] Aide | [yellow]TAB/S-TAB:[white] Cycle | [yellow]Ctrl+X:[white] Quitter | [yellow]Flèches:[white] Défiler"
+	HelpMsgArchive = "[yellow]Ctrl+G:[white] Aide | [yellow]Entrée:[white] Aperçu | [yellow]Ctrl+E:[white] Extraire | [yellow]..:[white] Sortir"
 	HelpMsgFiles   = HelpMsgDefault
 
 	HelpContentExplorer = `
  [yellow]Navigation & Panneaux[white]
  ----------------------
- F1          : Afficher cette aide
+ Ctrl + G    : Afficher cette aide
  TAB         : Passer au panneau suivant (Favoris -> Explorer -> Viewer)
  Shift + TAB : Passer au panneau précédent (cycle inverse)
  Ctrl + P    : Recherche Globale (Fuzzy Finder sur tout le disque)
@@ -28,26 +28,25 @@ const (
  ----------------------
  Entrée      : Ouvrir un fichier / Entrer dans un dossier
  ..          : Remonter au dossier parent
- b           : Ajouter / Retirer le dossier courant des favoris
+ Ctrl + A    : Ajouter le dossier courant des favoris
  Ctrl + F    : Créer un nouveau fichier
  Ctrl + D    : Créer un nouveau dossier
- Suppr       : Supprimer l'élément sélectionné
+ Ctrl + R / Suppr : Supprimer l'élément sélectionné
  Ctrl + E    : Extraire l'archive (zip, tar.gz...)
  Ctrl + K/U  : Copier / Coller (mémorisation de chemin)
- F3          : Connexion FTP / Distante
+ Ctrl + T    : Connexion FTP / Distante
  
  [yellow]Barre des Favoris (Active)[white]
  --------------------------
  1 - 9       : Accès rapide direct au favori par son numéro
- r           : Renommer le favori sélectionné
- d / Suppr   : Supprimer le favori de la liste
- b           : Retirer le dossier de la liste des favoris
+ Ctrl + N    : Renommer le favori sélectionné
+ Ctrl + R / Suppr : Supprimer le favori de la liste
  `
 
 	HelpContentArchive = `
  [yellow]Exploration d'Archive[white]
  ----------------------
- F1          : Afficher cette aide
+ Ctrl + G    : Afficher cette aide
  Entrée      : Visualiser un fichier dans l'archive
  ..          : Remonter (ou sortir de l'archive si à la racine)
  TAB/S-TAB   : Naviguer entre les panneaux (Cycle)
@@ -60,7 +59,7 @@ const (
 	HelpContentEditor = `
  [yellow]Édition de Texte[white]
  ----------------
- F1          : Afficher cette aide
+ Ctrl + G    : Afficher cette aide
  Ctrl + S    : Sauvegarder les modifications
  Ctrl + F    : Rechercher (Entrée pour suivant)
  Ctrl + K    : Couper la ligne (Nano style, concatène si répété)

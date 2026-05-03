@@ -41,7 +41,7 @@ func (e *EditorApp) showHelp(content string) {
 	e.showCenteredDialog("help", helpText, 65, 20)
 
 	helpText.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyF1 || event.Rune() == 'q' {
+		if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyCtrlG || event.Rune() == 'q' {
 			e.Pages.RemovePage("help")
 			if previousFocus != nil {
 				e.App.SetFocus(previousFocus)

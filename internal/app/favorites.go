@@ -204,7 +204,7 @@ func (e *EditorApp) setupFavHandlers() {
 		case tcell.KeyCtrlB, tcell.KeyEsc:
 			e.toggleFavorites()
 			return nil
-		case tcell.KeyDelete:
+		case tcell.KeyDelete, tcell.KeyCtrlR:
 			index := e.FavList.GetCurrentItem()
 			// Protection des favoris système (0: Home, 1: Racine)
 			if index <= 1 {
@@ -217,10 +217,8 @@ func (e *EditorApp) setupFavHandlers() {
 				e.refreshFavoritesList()
 			}
 			return nil
-		case tcell.KeyRune:
-			r := event.Rune()
-			if r == 'r' {
-				index := e.FavList.GetCurrentItem()
+		case tcell.KeyCtrlN:
+			index := e.FavList.GetCurrentItem()
 				if index <= 1 {
 					e.updateStatusTemp("[red]Les favoris système ne peuvent pas être renommés")
 					return nil
@@ -229,20 +227,6 @@ func (e *EditorApp) setupFavHandlers() {
 					e.showRenameFavoriteDialog(index)
 				}
 				return nil
-			}
-			if r == 'd' || r == 'b' {
-				index := e.FavList.GetCurrentItem()
-				if index <= 1 {
-					e.updateStatusTemp("[red]Les favoris système ne peuvent pas être supprimés")
-					return nil
-				}
-				if index >= 0 && index < len(e.Favorites) {
-					e.Favorites = append(e.Favorites[:index], e.Favorites[index+1:]...)
-					e.saveFavorites()
-					e.refreshFavoritesList()
-				}
-				return nil
-			}
 		}
 		return event
 	})

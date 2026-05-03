@@ -14,13 +14,14 @@ func (e *EditorApp) setupHandlers() {
 			tcell.KeyCtrlS: true, tcell.KeyCtrlF: true, tcell.KeyCtrlD: true,
 			tcell.KeyCtrlK: true, tcell.KeyCtrlU: true, tcell.KeyCtrlB: true,
 			tcell.KeyCtrlV: true, tcell.KeyCtrlX: true, tcell.KeyCtrlE: true,
-			tcell.KeyCtrlP: true,
+			tcell.KeyCtrlP: true, tcell.KeyCtrlG: true, tcell.KeyCtrlT: true,
+			tcell.KeyCtrlA: true, tcell.KeyCtrlN: true, tcell.KeyCtrlR: true,
 			tcell.KeyTab: true, tcell.KeyEnter: true,
 			tcell.KeyBackspace: true, tcell.KeyBackspace2: true,
 		}
 
 		switch event.Key() {
-		case tcell.KeyF1:
+		case tcell.KeyCtrlG:
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
 				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") ||
 				e.Pages.HasPage("delete") || e.Pages.HasPage("save_confirm") ||
@@ -35,7 +36,7 @@ func (e *EditorApp) setupHandlers() {
 			}
 			e.showHelp(helpContent)
 			return nil
-		case tcell.KeyF3:
+		case tcell.KeyCtrlT:
 			if e.Pages.HasPage("help") || e.Pages.HasPage("quit") ||
 				e.Pages.HasPage("newfile") || e.Pages.HasPage("newdir") ||
 				e.Pages.HasPage("delete") || e.Pages.HasPage("ftp") {

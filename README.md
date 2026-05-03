@@ -4,7 +4,7 @@
 
 **Hollow** est un éditeur de texte TUI (Terminal User Interface) moderne et ultra-fluide écrit en Go. Il fusionne la simplicité d'utilisation de **Nano** avec la puissance de navigation et de gestion de fichiers distants inspirée de **mcedit** (Midnight Commander).
 
-Ce projet est développé avec une IA, dans un but récréatif et éducatif.
+Ce projet est développé avec une IA, dans un but récréatif et pédagogique.
 
 ## Aperçu
 
@@ -35,19 +35,19 @@ Le projet repose sur une abstraction puissante du système de fichiers (**VFS**)
 ### Navigation (Explorateur / Visualiseur / Favoris)
 | Touche | Action |
 | :--- | :--- |
-| `F1` | Aide contextuelle (adaptée au panneau actif) |
-| `F3` | Ouvrir le dialogue de connexion FTP |
+| `Ctrl + G` | Aide contextuelle (adaptée au panneau actif) |
+| `Ctrl + T` | Ouvrir le dialogue de connexion FTP |
 | `Ctrl + B` | Afficher / Masquer la barre latérale des Favoris |
 | `TAB` | Passer au panneau suivant (Favoris → Explorateur → Visualiseur) |
 | `Shift + TAB` | Passer au panneau précédent (cycle inverse) |
 | `Entrée` | Ouvrir un fichier ou entrer dans un dossier / archive |
-| `b` | Ajouter / Retirer le dossier courant des favoris |
+| `Ctrl + A` | Ajouter / Retirer le dossier courant des favoris |
 | `Ctrl + P` | Recherche Globale (Fuzzy Finder sur tout le disque) |
 | `1-9` | Accès rapide direct aux favoris (Home & Racine par défaut) |
-| `r` | Renommer le favori sélectionné |
+| `Ctrl + N` | Renommer le favori sélectionné |
 | `Ctrl + F` | Créer un nouveau fichier |
 | `Ctrl + D` | Créer un nouveau dossier |
-| `Suppr` | Supprimer l'élément sélectionné dans l'explorateur |
+| `Ctrl + R` / `Suppr` | Supprimer l'élément sélectionné dans l'explorateur ou les favoris |
 | `Ctrl + E` | Extraire une archive (ou un fichier d'une archive) |
 | `Ctrl + K` / `Ctrl + U` | Copier / Coller un élément |
 | `Ctrl + X` | Quitter Hollow (demande confirmation) |
@@ -55,7 +55,7 @@ Le projet repose sur une abstraction puissante du système de fichiers (**VFS**)
 ### Édition (Éditeur Plein Écran)
 | Touche | Action |
 | :--- | :--- |
-| `F1` | Aide contextuelle (Édition) |
+| `Ctrl + G` | Aide contextuelle (Édition) |
 | `Ctrl + S` | Sauvegarder les modifications |
 | `Ctrl + F` | Rechercher dans le texte (Suivant avec Entrée) |
 | `Ctrl + K` | Couper la ligne actuelle (Nano-style, concatène si répété) |
